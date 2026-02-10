@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Monitoring Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary: #7209b7;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --warning: #ff9e00;
+      --dark: #121826;
+      --light: #f8f9fa;
+      --card-bg: #ffffff;
+      --sidebar-bg: #1a1d29;
+      --gradient: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f5f7ff 0%, #f0f2ff 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Modern Navbar */
+    .navbar-modern {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+      padding: 0.8rem 0;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.4rem;
+      background: var(--gradient);
+
+      -webkit-background-clip: text;
+      /* Chrome, Safari */
+      background-clip: text;
+      /* Standard */
+
+      -webkit-text-fill-color: transparent;
+    }
+
+
+    .nav-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .nav-item {
+      margin: 0 4px;
+    }
+
+    .nav-link {
+      color: #64748b !important;
+      font-weight: 500;
+      padding: 0.5rem 1rem !important;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-link:hover {
+      color: var(--primary) !important;
+      background: rgba(67, 97, 238, 0.08);
+    }
+
+    .nav-link.active {
+      color: var(--primary) !important;
+      background: rgba(67, 97, 238, 0.12);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: var(--primary);
+      border-radius: 50%;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Stats Cards */
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 1.5rem;
+      border: none;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      height: 100%;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .icon-primary {
+      background: rgba(67, 97, 238, 0.12);
+      color: var(--primary);
+    }
+
+    .icon-success {
+      background: rgba(76, 201, 240, 0.12);
+      color: var(--success);
+    }
+
+    .icon-danger {
+      background: rgba(247, 37, 133, 0.12);
+      color: var(--danger);
+    }
+
+    .icon-warning {
+      background: rgba(255, 158, 0, 0.12);
+      color: var(--warning);
+    }
+
+    /* .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    } */
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      background: var(--gradient);
+
+      -webkit-background-clip: text;
+      /* Chrome, Safari */
+      background-clip: text;
+      /* Standard */
+
+      -webkit-text-fill-color: transparent;
+    }
+
+
+    /* Main Content */
+    .main-content {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-subtitle {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      padding: 0.35rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-healthy {
+      background: rgba(76, 201, 240, 0.15);
+      color: #0891b2;
+    }
+
+    .status-warning {
+      background: rgba(255, 158, 0, 0.15);
+      color: #d97706;
+    }
+
+    .status-critical {
+      background: rgba(247, 37, 133, 0.15);
+      color: #be185d;
+    }
+
+    .status-pending {
+      background: rgba(100, 116, 139, 0.15);
+      color: #64748b;
+    }
+
+    /* Table Styling */
+    .data-table {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      border: none;
+    }
+
+    .data-table thead th {
+      background: rgba(67, 97, 238, 0.04);
+      border: none;
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table tbody td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      vertical-align: middle;
+    }
+
+    .data-table tbody tr:hover {
+      background: rgba(67, 97, 238, 0.03);
+    }
+
+    /* Tabs */
+    .custom-tabs {
+      border: none;
+      background: transparent;
+      gap: 8px;
+      margin-bottom: 2rem;
+    }
+
+    .custom-tabs .nav-link {
+      padding: 0.75rem 1.5rem !important;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      background: rgba(255, 255, 255, 0.5);
+      color: #64748b;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .custom-tabs .nav-link:hover {
+      border-color: rgba(67, 97, 238, 0.2);
+      color: var(--primary);
+    }
+
+    .custom-tabs .nav-link.active {
+      background: #e8ecfd;
+      color: white;
+      border-color: #e8ecfd;
+    }
+
+    /* Loading Animation */
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(67, 97, 238, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* API Status Indicator */
+    .api-status {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    .api-status.healthy {
+      background: #4cc9f0;
+    }
+
+    .api-status.warning {
+      background: #ff9e00;
+    }
+
+    .api-status.critical {
+      background: #f72585;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1rem;
+      }
+
+      .navbar-nav {
+        margin-top: 1rem;
+      }
+
+      .stat-card {
+        margin-bottom: 1rem;
+      }
+    }
+
+    /* Search Bar */
+    .search-bar {
+      position: relative;
+      max-width: 400px;
+    }
+
+    .search-bar input {
+      border-radius: 12px;
+      padding-left: 2.5rem;
+      border: 2px solid rgba(67, 97, 238, 0.1);
+      background: rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    }
+
+    .search-bar i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Modern Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-modern">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <div class="nav-icon">
+          <i class="bi bi-speedometer2"></i>
+        </div>
+        Monitoring Console
+      </a>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="search-bar">
+          <i class="bi bi-search"></i>
+          <input type="text" class="form-control" placeholder="Search scripts, APIs..." id="globalSearch">
+        </div>
+
+        <div class="dropdown">
+          <div class="user-avatar" data-bs-toggle="dropdown">
+            <span>AD</span>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <div class="section-header">
+      <h1 class="section-title">Dashboard</h1>
+      <!-- <p class="section-subtitle">Real-time monitoring of scripts, APIs, and services</p> -->
+      <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-primary" onclick="fetchProjectData()">
+          <i class="bi bi-arrow-clockwise me-2"></i>Refresh Data
+        </button>
+        <button class="btn btn-outline-primary" onclick="showAllLogs()">
+          <i class="bi bi-journal-text me-2"></i>View Logs
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Fetching project data...</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="row g-4 mb-5" id="statsOverview">
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon icon-primary">
+            <i class="bi bi-cpu"></i>
+          </div>
+          <h3 class="stat-number" id="totalScripts">0</h3>
+          <p class="text-muted mb-2">Total Scripts</p>
+          <small class="text-success" id="scriptsChange">+0 today</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon icon-success">
+            <i class="bi bi-plug"></i>
+          </div>
+          <h3 class="stat-number" id="healthyApis">0</h3>
+          <p class="text-muted mb-2">Healthy APIs</p>
+          <small class="text-success" id="apisChange">All systems normal</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon icon-warning">
+            <i class="bi bi-exclamation-triangle"></i>
+          </div>
+          <h3 class="stat-number" id="failedJobs">0</h3>
+          <p class="text-muted mb-2">Failed Jobs (24h)</p>
+          <small class="text-danger" id="failuresChange">Requires attention</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon icon-danger">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <h3 class="stat-number" id="avgResponse">0ms</h3>
+          <p class="text-muted mb-2">Avg Response Time</p>
+          <small class="text-warning" id="responseChange">Within limits</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills custom-tabs" id="mainTabs">
+      <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#scriptsTab">
+          <i class="bi bi-file-code me-2"></i>Scripts
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#apisTab">
+          <i class="bi bi-plug me-2"></i>APIs
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#schedulerTab">
+          <i class="bi bi-clock me-2"></i>Scheduler
+        </button>
+      </li>
+      <!-- <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#gisTab">
+          <i class="bi bi-map me-2"></i>GIS Layers
+        </button>
+      </li> -->
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Scripts Tab -->
+      <div class="tab-pane fade show active" id="scriptsTab">
+        <div class="data-table">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Script Name</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Last Run</th>
+                  <th>Duration</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="scriptsTable">
+                <!-- Script data will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- APIs Tab -->
+      <div class="tab-pane fade" id="apisTab">
+        <div class="data-table">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>API Name</th>
+                  <th>Endpoint</th>
+                  <th>Status</th>
+                  <th>Response Time</th>
+                  <th>Last Check</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="apisTable">
+                <!-- API data will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scheduler Tab -->
+      <div class="tab-pane fade" id="schedulerTab">
+        <div class="data-table">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Job Name</th>
+                  <th>Schedule</th>
+                  <th>Next Run</th>
+                  <th>Last Run</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="schedulerTable">
+                <!-- Scheduler data will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- GIS Tab -->
+      <div class="tab-pane fade" id="gisTab">
+        <div class="data-table">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Layer Name</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Last Updated</th>
+                  <th>Preview</th>
+                </tr>
+              </thead>
+              <tbody id="gisTable">
+                <!-- GIS data will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Configuration
+    const API_BASE_URL = 'https://your-api-endpoint.com'; // Replace with your API endpoint
+    const PROJECT_ID = 'agriconnect'; // Your project ID
+
+    // Mock data for demonstration (remove when real API is available)
+    const mockData = {
+      scripts: [
+        { id: 1, name: 'ingest_crops.sql', type: 'SQL', status: 'healthy', lastRun: '2024-01-15T10:30:00Z', duration: '45s', nextRun: '2024-01-16T02:00:00Z' },
+        { id: 2, name: 'calculate_rates.py', type: 'Python', status: 'warning', lastRun: '2024-01-15T06:00:00Z', duration: '2m 30s', nextRun: '2024-01-15T18:00:00Z' },
+        { id: 3, name: 'push_to_queue.sh', type: 'Shell', status: 'healthy', lastRun: '2024-01-15T11:00:00Z', duration: '15s', nextRun: 'On Demand' },
+        { id: 4, name: 'sync_database.js', type: 'Node.js', status: 'critical', lastRun: '2024-01-14T23:45:00Z', duration: '5m', nextRun: '2024-01-15T23:45:00Z' },
+      ],
+      apis: [
+        { id: 1, name: 'Weather API', endpoint: '/api/weather/v1', status: 'healthy', responseTime: '245ms', lastCheck: '2024-01-15T11:15:00Z' },
+        { id: 2, name: 'Market Rates', endpoint: '/api/rates/latest', status: 'warning', responseTime: '1200ms', lastCheck: '2024-01-15T11:10:00Z' },
+        { id: 3, name: 'Payment Gateway', endpoint: '/api/payments/verify', status: 'healthy', responseTime: '85ms', lastCheck: '2024-01-15T11:05:00Z' },
+        { id: 4, name: 'Soil Data', endpoint: '/api/soil/analyze', status: 'critical', responseTime: 'Timeout', lastCheck: '2024-01-15T10:45:00Z' },
+      ],
+      scheduler: [
+        { id: 1, name: 'Daily Crop Sync', schedule: '0 2 * * *', nextRun: '2024-01-16T02:00:00Z', lastRun: '2024-01-15T02:00:00Z', status: 'healthy' },
+        { id: 2, name: 'Price Updates', schedule: '*/15 * * * *', nextRun: '2024-01-15T11:30:00Z', lastRun: '2024-01-15T11:15:00Z', status: 'healthy' },
+        { id: 3, name: 'Backup Job', schedule: '0 0 * * 0', nextRun: '2024-01-21T00:00:00Z', lastRun: '2024-01-14T00:00:00Z', status: 'warning' },
+      ],
+      gis: [
+        { id: 1, name: 'SoilMap Layer', type: 'Raster', status: 'healthy', lastUpdated: '2024-01-14T03:00:00Z' },
+        { id: 2, name: 'Parcel Boundaries', type: 'Vector', status: 'healthy', lastUpdated: '2024-01-15T01:30:00Z' },
+        { id: 3, name: 'Weather Zones', type: 'Vector', status: 'warning', lastUpdated: '2024-01-12T12:00:00Z' },
+      ]
+    };
+
+    // Format date function
+    function formatDate(dateString) {
+      if (!dateString) return 'Never';
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 60) return `${diffMins} mins ago`;
+      if (diffHours < 24) return `${diffHours} hours ago`;
+      if (diffDays < 7) return `${diffDays} days ago`;
+      return date.toLocaleDateString();
+    }
+
+    // API Call function (replace with your actual API)
+    async function fetchProjectData() {
+      showLoading(true);
+
+      try {
+        // Replace this with your actual API call
+        // const response = await fetch(`${API_BASE_URL}/projects/${PROJECT_ID}/status`);
+        // const data = await response.json();
+
+        // For demo, using mock data with delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const data = mockData;
+
+        updateDashboard(data);
+        showNotification('Data refreshed successfully', 'success');
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        showNotification('Failed to fetch data. Using cached data.', 'danger');
+        updateDashboard(mockData); // Fallback to mock data
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Update dashboard with data
+    function updateDashboard(data) {
+      // Update stats
+      const totalScripts = data.scripts.length;
+      const healthyApis = data.apis.filter(api => api.status === 'healthy').length;
+      const failedJobs = data.scripts.filter(script => script.status === 'critical').length;
+      const avgResponse = Math.round(
+        data.apis
+          .filter(api => !isNaN(parseInt(api.responseTime)))
+          .reduce((acc, api) => acc + parseInt(api.responseTime), 0) /
+        data.apis.filter(api => !isNaN(parseInt(api.responseTime))).length || 0
+      );
+
+      document.getElementById('totalScripts').textContent = totalScripts;
+      document.getElementById('healthyApis').textContent = `${healthyApis}/${data.apis.length}`;
+      document.getElementById('failedJobs').textContent = failedJobs;
+      document.getElementById('avgResponse').textContent = `${avgResponse}ms`;
+
+      // Update scripts table
+      updateTable('scriptsTable', data.scripts, (item) => `
+        <tr>
+          <td>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-file-text me-3 text-primary"></i>
+              <div>
+                <strong>${item.name}</strong>
+                <div class="small text-muted">${item.type}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="badge bg-light text-dark">${item.type}</span>
+          </td>
+          <td>
+            <span class="status-badge ${getStatusClass(item.status)}">
+              <i class="bi ${getStatusIcon(item.status)} me-1"></i>
+              ${item.status.toUpperCase()}
+            </span>
+          </td>
+          <td>${formatDate(item.lastRun)}</td>
+          <td>${item.duration}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" onclick="viewScript(${item.id})">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="runScript(${item.id})">
+              <i class="bi bi-play"></i>
+            </button>
+          </td>
+        </tr>
+      `);
+
+      // Update APIs table
+      updateTable('apisTable', data.apis, (item) => `
+        <tr>
+          <td>
+            <div class="d-flex align-items-center">
+              <span class="api-status ${item.status}"></span>
+              <strong>${item.name}</strong>
+            </div>
+          </td>
+          <td>
+            <code class="small">${item.endpoint}</code>
+          </td>
+          <td>
+            <span class="status-badge ${getStatusClass(item.status)}">
+              ${item.status.toUpperCase()}
+            </span>
+          </td>
+          <td>
+            <span class="${item.responseTime === 'Timeout' ? 'text-danger' : ''}">
+              ${item.responseTime}
+            </span>
+          </td>
+          <td>${formatDate(item.lastCheck)}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" onclick="testApi(${item.id})">
+              <i class="bi bi-lightning-charge"></i> Test
+            </button>
+          </td>
+        </tr>
+      `);
+
+      // Update scheduler table
+      updateTable('schedulerTable', data.scheduler, (item) => `
+        <tr>
+          <td>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-clock-history me-3 text-warning"></i>
+              <strong>${item.name}</strong>
+            </div>
+          </td>
+          <td>
+            <code class="small">${item.schedule}</code>
+          </td>
+          <td>${formatDate(item.nextRun)}</td>
+          <td>${formatDate(item.lastRun)}</td>
+          <td>
+            <span class="status-badge ${getStatusClass(item.status)}">
+              ${item.status.toUpperCase()}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" onclick="runNow(${item.id})">
+              <i class="bi bi-play-circle"></i> Run Now
+            </button>
+          </td>
+        </tr>
+      `);
+
+      // Update GIS table
+      updateTable('gisTable', data.gis, (item) => `
+        <tr>
+          <td>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-geo-alt me-3 text-success"></i>
+              <strong>${item.name}</strong>
+            </div>
+          </td>
+          <td>
+            <span class="badge bg-light text-dark">${item.type}</span>
+          </td>
+          <td>
+            <span class="status-badge ${getStatusClass(item.status)}">
+              ${item.status.toUpperCase()}
+            </span>
+          </td>
+          <td>${formatDate(item.lastUpdated)}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-success" onclick="previewLayer(${item.id})">
+              <i class="bi bi-map"></i> Preview
+            </button>
+          </td>
+        </tr>
+      `);
+    }
+
+    // Helper function to update tables
+    function updateTable(tableId, data, rowTemplate) {
+      const table = document.getElementById(tableId);
+      if (data.length === 0) {
+        table.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-1"></i>
+              <p class="mt-2">No data available</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      table.innerHTML = data.map(rowTemplate).join('');
+    }
+
+    // Helper functions for status
+    function getStatusClass(status) {
+      switch (status) {
+        case 'healthy': return 'status-healthy';
+        case 'warning': return 'status-warning';
+        case 'critical': return 'status-critical';
+        default: return 'status-pending';
+      }
+    }
+
+    function getStatusIcon(status) {
+      switch (status) {
+        case 'healthy': return 'bi-check-circle';
+        case 'warning': return 'bi-exclamation-triangle';
+        case 'critical': return 'bi-x-circle';
+        default: return 'bi-clock';
+      }
+    }
+
+    // UI Functions
+    function showLoading(show) {
+      document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+      document.getElementById('statsOverview').style.display = show ? 'none' : 'flex';
+      document.getElementById('mainTabs').style.display = show ? 'none' : 'flex';
+      document.querySelector('.tab-content').style.display = show ? 'none' : 'block';
+    }
+
+    function showNotification(message, type) {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+      notification.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      `;
+      notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+
+      document.body.appendChild(notification);
+
+      // Auto remove after 5 seconds
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+
+    // Action Functions (stubs - implement as needed)
+    function viewScript(id) {
+      showNotification(`Viewing script ${id}`, 'info');
+    }
+
+    function runScript(id) {
+      showNotification(`Running script ${id}...`, 'warning');
+    }
+
+    function testApi(id) {
+      showNotification(`Testing API ${id}...`, 'info');
+    }
+
+    function runNow(id) {
+      showNotification(`Running job ${id} now...`, 'warning');
+    }
+
+    function previewLayer(id) {
+      showNotification(`Previewing GIS layer ${id}`, 'info');
+    }
+
+    function showAllLogs() {
+      showNotification('Opening logs panel...', 'info');
+    }
+
+    // Search functionality
+    document.getElementById('globalSearch').addEventListener('input', function (e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const tables = ['scriptsTable', 'apisTable', 'schedulerTable', 'gisTable'];
+
+      tables.forEach(tableId => {
+        const rows = document.querySelectorAll(`#${tableId} tr`);
+        rows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+      });
+    });
+
+    // Auto-refresh every 30 seconds
+    setInterval(fetchProjectData, 30000);
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchProjectData();
+
+      // Add search functionality
+      const searchInput = document.getElementById('globalSearch');
+      if (searchInput) {
+        searchInput.focus();
+      }
+    });
+  </script>
+</body>
+
+</html>

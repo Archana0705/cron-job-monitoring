@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Activity Tracker</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+    <!-- Favicons -->
+    <link href="assets/img/tn_logo.png" rel="icon">
+    <link href="assets/img/tn_logo.png" rel="apple-touch-icon">
+    <!-- Google Fonts -->
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+      rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+    <style>
+      ul#myTab {
+        border-bottom: 0;
+      }
+      .clear-both {
+      clear: both;
+      } 
+      .txtblue {
+      font-weight: bolder;
+      color: #33208c;
+      font-size: 15px;
+      } 
+      .customer-details address strong {
+      font-weight: bolder;
+      color: #33208c;
+      font-size: 15px;
+      } 
+      .font14 {
+      font-size: 14px;
+      }
+      .custom-modal-width {
+      max-width: 50% !important; /* Adjust percentage as needed */
+      }
+      .otp-field input {
+      display: inline-block !important;
+      width: 15% !important;
+      }
+      #scheme_details_length .custom-select.custom-select-sm.form-control.form-control-sm {
+      margin: 0px 6px;
+      font-size: 12px !important;
+      padding: 0 10px;
+      min-height: calc(0.5em + 0.5em + 2px) !important;
+      font-weight: 600;
+      }
+      .tab-title {
+      background-color: #301d92;
+      color: white;
+      }
+      .parameter-list {
+      list-style: none;
+      margin: 0;
+      padding: 0px 1px;
+      display: flex;
+      flex-wrap: wrap;
+      }
+      .parameter-items {
+      background: #e4f1ff;
+      padding: 2px 4px;
+      border-radius: 5px;
+      list-style: none;
+      width: max-content;
+      margin: 3px;
+      }
+      .modal-header {
+      padding: 10px 20px;
+      box-shadow: 0px 0px 10px #00000096;
+      }
+      /* .progress {
+      --bs-progress-height: 1.00rem !important;
+      } */
+      .applyCancleCta .btn:disabled {
+      background-color: grey;
+      /* Change to your preferred grey color */
+      color: white;
+      /* Change text color if needed */
+      cursor: not-allowed;
+      /* Optional: Change cursor style */
+      opacity: 0.6;
+      /* Optional: Make it look faded */
+      }
+      .custom-checkbox .form-check-input {
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      }
+      .custom-checkbox .form-check-label {
+      font-size: 12px;
+      color: #495057;
+      line-height: 1.5;
+      }
+      .form-check.custom-checkbox:hover .form-check-input {
+      background-color: #33208c;
+      border-color: #33208c;
+      }
+      .form-check.custom-checkbox:focus-within .form-check-input {
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+      }
+      .hover-shadow-lg:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .form-check.custom-checkbox input:checked {
+      background-color: #28a745;
+      border-color: #28a745;
+      }
+      .form-check.custom-checkbox input:checked + .form-check-label {
+      color: #28a745;
+      }
+      .resend-button {
+      background: #33208c; /* Blue background */
+      border: none;
+      color: white;
+      font-size: 12px;
+      /* padding: 8px 12px; */
+      border-radius: 10%;
+      /* display: flex; */
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .resend-button i {
+      font-size: 1.2em;
+      }
+      .resend-button:hover {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+      background: #0056b3; /* Darker blue on hover */
+      }
+      .resend-button:active {
+      transform: scale(0.95);
+      }
+      .parameters {
+      max-height: 20vh;
+      }
+      #scheme_info .over-scroll-down {
+      overflow-y: scroll !important;
+      }
+      #check_scheme_eligibility{
+      margin-bottom: 77px;
+      }
+      #scheme_eligibility{
+      margin-bottom: 77px;
+      }
+      #studentTableBody td:nth-child(2) {
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      }
+      #schemeTableBody td:nth-child(2) {
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      }
+      .table td {
+      max-height: 50px; /* Set a maximum height */
+      overflow: hidden; /* Hide overflow */
+      text-overflow: ellipsis; /* Add ellipsis for overflow */
+      white-space: nowrap; /* Prevent wrapping */
+      line-height: 1.2; /* Set line height for readability */
+      vertical-align: middle; 
+      }
+      #check_scheme_content td:nth-child(2) {
+      height: 150px;
+      overflow-y: auto;
+      word-break: break-all !important;
+      white-space: break-spaces;
+      display: block; 
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header" class="header fixed-top d-flex flex-column">
+     
+      <div class="d-flex flex-row align-items-center w-100">
+        <div class="d-flex align-items-center justify-content-between">
+          <i class="bi bi-list toggle-sidebar-btn"></i>
+          <a href="index.html?details=GfwfmwqhyLNY2TIYlWMvlnlDWlJTMWhJOTJtSWU4WWhYbG9ENUFWRVJySEg3UDJQTUV3V05aMXBXUk09%27"
+            class="logo d-flex align-items-center mx-2" data-aos="fade-down">
+          <img src="assets/img/tngis-logo.png" alt="logo" class="logo_header">
+          <span class="fs-4 title">Activity Tracker</span>
+          </a>
+        </div>
+        <!-- End Logo -->
+        <!-- End Search Bar -->
+        <nav class="header-nav ms-auto">
+          <ul class="d-flex align-items-center d-none">
+            <li class="nav-item" data-aos="fade-down">
+              <a class="nav-link mx-2 nav-profile"><i class="bi bi-person"></i> <span class="" id="stud_name"></span></a>
+            </li>
+            <li class="nav-item" data-aos="fade-down">
+              <a class="nav-link mx-2 nav-profile"><span class="" id="stud_year">-</span></a>
+            </li>
+            <li class="nav-item" data-aos="fade-down">
+              <i class="bi bi-calendar-check"></i>
+              <span class="" id="dateTimeLink">-</span>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <!-- End Icons Navigation -->
+    </header>
+    <!-- End Header -->
+    <!-- ======= Sidebar ======= -->
+    <aside id="sidebar" class="sidebar">
+      <ul class="nav nav-pills flex-column mb-auto">
+      <ul class="sidebar-nav" id="sidebar-nav" data-aos="fade-left" data-aos-duration="600">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" data-aos="fade-left" data-aos-duration="1000" id="dashboard-link">
+          <i class="bi bi-house-fill"></i>
+          <span data-i18n="dashboard-link">Dashboard</span>
+          </a>
+        </li>
+       
+      </ul>
+    </aside>
+    <!-- End Sidebar-->
+    <!-- <div id="preloader"></div> -->
+    <!-- End Sidebar-->
+    <main id="main" class="main">
+      <!-- Dashboard view starts -->
+      <section style="margin-bottom: 5rem;">
+        <div class="add-btn-area">
+        </div>
+        <div class="container-fluid">
+     
+          <div class="container-fluid">
+
+            <!-- 1st grid -->
+            <div class="col-lg-12 my-2">
+              <h5 class="title">
+                <span data-i18n="eligibility-schemes">Scheduler & Cron Jobs</span>
+              </h5>
+            </div>
+            <div class="col-lg-12">
+              <div class="card">
+                <div class="card-body pt-3">
+                  
+                  <div class="clear-both"></div>
+                  <div class="col-lg-12">
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">S.No</th>
+                            <th scope="col">Activity Name</th>
+                            <th scope="col">Trigger Info</th>
+                            <th scope="col">Last Executed Time</th>
+                            <th scope="col">Service</th>
+                            <th scope="col">Time Taken (milliseconds)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>1</td>
+                            <td>DEFICT_INDENT_PROPAGATION_EVENT</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>1023</td>
+                          </tr>
+                          <tr>
+                            <td>2</td>
+                            <td>DEFICT_INDENT_PROPAGATION_EVENT</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>1023</td>
+                          </tr>
+                          <tr>
+                            <td>3</td>
+                            <td>DEFICT_INDENT_PROPAGATION_EVENT</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>1023</td>
+                          </tr>
+                         
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 1st grid -->
+
+
+            <!-- 2nd grid -->
+            <div class="col-lg-12 my-2">
+              <h5 class="title">
+                <span data-i18n="eligibility-schemes">External API'S</span>
+              </h5>
+            </div>
+            <div class="col-lg-12">
+              <div class="card">
+                <div class="card-body pt-3">
+                  
+                  <div class="clear-both"></div>
+                  <div class="col-lg-12">
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">S.No</th>
+                            <th scope="col">API Name</th>
+                            <th scope="col">URL</th>
+                            <th scope="col">Response Time(in ms)</th>
+                            <th scope="col">Last Successfully verified time</th>
+                            <th scope="col">Last verified time</th>
+                            <th scope="col">Services</th>
+                            <th scope="col">Remarks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>1</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          <tr>
+                            <td>2</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          <tr>  
+                            <td>3</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td>21 Jul, 2025 3:2049 PM</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                         
+                         
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 2nd grid -->
+
+
+
+            <!-- 3rd grid -->
+            <div class="col-lg-12 my-2">
+              <h5 class="title"> 
+                <span data-i18n="eligibility-schemes">Internal API'S</span>
+              </h5>
+            </div>
+            <div class="col-lg-12">
+              <div class="card">
+                <div class="card-body pt-3">
+                  
+                  <div class="clear-both"></div>
+
+
+                  <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">Tab 1</button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">Tab 2</button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button" role="tab" aria-controls="contact-tab-pane" aria-selected="false">Tab 3</button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="disabled-tab" data-bs-toggle="tab" data-bs-target="#disabled-tab-pane" type="button" role="tab" aria-controls="disabled-tab-pane" aria-selected="false">Tab 4</button>
+                      </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                      <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+                        <div class="col-lg-12">
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">S.No</th>
+                            <th scope="col">API Name</th>
+                            <th scope="col">URL</th>
+                            <th scope="col">Response Time(in ms)</th>
+                            <th scope="col">Services</th>
+                            <th scope="col">Remarks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>1</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          <tr>
+                            <td>2</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          <tr>
+                            <td>3</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          
+                         
+                         
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                      </div>
+                      <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+                        <div class="col-lg-12">
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">S.No</th>
+                            <th scope="col">API Name</th>
+                            <th scope="col">URL</th>
+                            <th scope="col">Response Time(in ms)</th>
+                            <th scope="col">Services</th>
+                            <th scope="col">Remarks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>1</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          <tr>
+                            <td>2</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          <tr>
+                            <td>3</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          
+                         
+                         
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                      </div>
+                      <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">
+                        <div class="col-lg-12">
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">S.No</th>
+                            <th scope="col">API Name</th>
+                            <th scope="col">URL</th>
+                            <th scope="col">Response Time(in ms)</th>
+                            <th scope="col">Services</th>
+                            <th scope="col">Remarks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>1</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          <tr>
+                            <td>2</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          <tr>
+                            <td>3</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          
+                         
+                         
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                      </div>
+                      <div class="tab-pane fade" id="disabled-tab-pane" role="tabpanel" aria-labelledby="disabled-tab" tabindex="0">
+                        <div class="col-lg-12">
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">S.No</th>
+                            <th scope="col">API Name</th>
+                            <th scope="col">URL</th>
+                            <th scope="col">Response Time(in ms)</th>
+                            <th scope="col">Services</th>
+                            <th scope="col">Remarks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>1</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          <tr>
+                            <td>2</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          <tr>
+                            <td>3</td>
+                            <td>SIPCOT</td>
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" value="https://sipcot.tn.gov.in" aria-label="Recipient’s username" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Copy</span>
+                              </div>
+                            </td>
+                            <td>423</td>
+                            <td><span class="badge text-bg-success"><i class="bi bi-check2-circle"></i> Success</span></td>
+                            <td>OK</td>
+                          </tr>
+                          
+                         
+                         
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                      </div>
+                    </div>
+
+
+
+                  
+                </div>
+              </div>
+            </div>
+            <!-- 3rd grid -->
+
+          </div>
+        </div>
+      </section>
+      <!-- Modal  -->
+
+
+      
+      </div>
+      </div>
+      
+      </section>
+    </main>
+    <!-- Check Eligibility -->
+    <!-- if you want to close by clicking outside the modal, delete the last endpoint:data-bs-backdrop and data-bs-keyboard -->
+    <div class="modal fade" id="checkeligibility_modal" tabindex="-1" data-bs-backdrop="static"
+      data-bs-keyboard="false" role="dialog" aria-labelledby="checkeligibility_modal" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              Scheme Eligibility
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="">
+              <div class="card-body" id="check_eligibility_content">
+                <!-- <check-eligibility-component></check-eligibility-component> -->
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Check Eligibility -->
+
+
+    <student-refresh></student-refresh>
+    <!-- End #main -->
+    <!-- ======= Footer ======= -->
+    <footer id="footer" class="footer">
+      <div class="copyright">
+        &copy; Copyright <strong><span>TNGIS</span></strong>. All Rights Reserved
+      </div>
+      <div class="credits">
+        Designed & Developed by <a href="https://tngis.tnega.org/" target="_blank">TNGIS</a>
+      </div>
+    </footer>
+    <!-- End Footer -->
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
+
+    <script src="assets/vendor/jquery/jquery.min.js"></script>  
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/add.js"></script>
+    <script src="assets/js/global.js"></script>
+    
+    <script></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          // Select the modal and the first OTP input
+          const otpModal = document.getElementById("opt_modal"); // set the modal id here
+          const otp1 = document.getElementById("otp_input_1"); // set the 1st input box id here
+      
+          // Add focus when modal is shown
+          otpModal.addEventListener("shown.bs.modal", function () {
+              otp1.focus();
+          });
+      });
+    </script>
+    <script>
+      $(document).ready(function () {
+      // simulate a click on page load
+      $(".toggle-sidebar-btn").trigger("click");
+    });
+    </script>
+  </body>
+</html>

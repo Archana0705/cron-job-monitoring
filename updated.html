@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    .card-soft {
+      border: none;
+      border-radius: 12px;
+      background: #f9fafc;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      padding: 1rem;
+      transition: transform 0.2s ease;
+    }
+    .card-soft:hover { transform: translateY(-4px); }
+    .small-card h4 { margin: 0; font-weight: 600; }
+    .status-chip {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+    .status-success { background: #d1f7c4; color: #157347; }
+    .status-fail { background: #f8d7da; color: #842029; }
+    #envTabs .nav-link {
+      border-radius: 20px;
+      font-weight: 500;
+      padding: 6px 16px;
+      transition: 0.2s ease;
+    }
+    #envTabs .nav-link.active {
+      background-color: #0d6efd;
+      color: #fff;
+    }
+    .table thead th {
+      text-align: center;
+      vertical-align: middle;
+    }
+    .muted-small {
+      font-size: 0.75rem;
+      color: #6c757d;
+    }
+    .mono { font-family: monospace; }
+  </style>
+</head>
+<body class="p-4 bg-light">
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card card-soft small-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">Total Projects</small>
+            <h4 id="cardProjects">0</h4>
+          </div>
+          <i class="bi bi-folder fs-2 text-secondary"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-soft small-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">Total Scripts</small>
+            <h4 id="cardScripts">0</h4>
+          </div>
+          <i class="bi bi-file-code fs-2 text-secondary"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-soft small-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">Failed Jobs Today</small>
+            <h4 id="cardFailed">0</h4>
+          </div>
+          <i class="bi bi-exclamation-octagon fs-2 text-danger"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-soft small-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">APIs Unhealthy</small>
+            <h4 id="cardApiFail">0</h4>
+          </div>
+          <i class="bi bi-plug fs-2 text-warning"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid mt-4">
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-3" id="envTabs">
+    <li class="nav-item">
+      <button class="nav-link active" data-env="all">All</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-env="prod">Production</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-env="staging">Staging</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-env="wms">WMS</button>
+    </li>
+  </ul>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="table table-hover table-fixed mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Project</th>
+          <th>URL</th>
+          <th>Env</th>
+          <th>Category</th>
+          <th>Current Status</th>
+          <th>Last Updated by Log</th>
+          <th>Last Updated in DB</th>
+          <th colspan="2" class="text-center">Script Period</th>
+          <th colspan="2" class="text-center">Cron Job Period</th>
+          <th>Scripts</th>
+          <th>APIs</th>
+          <th>Actions</th>
+        </tr>
+        <tr class="small text-muted">
+          <th colspan="7"></th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Start</th>
+          <th>End</th>
+          <th colspan="3"></th>
+        </tr>
+      </thead>
+      <tbody id="projectsTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+
+
+
+ 
+ <script>
+// Sample Data
+const sampleProjects = [
+  {
+    id: 1,
+    name: 'AgriConnect',
+    env: 'staging',
+    status: 'active',
+    category: ['API', 'Script', 'Cron'],
+    lastUpdated: '2025-09-29T10:23:12',
+    scripts: 6,
+    apis: 8,
+    urls: {
+      staging: 'https://staging.agri.local',
+      prod: 'https://agri.example.com',
+      wms: 'https://wms.agri.example.com'
+    },
+    scriptPeriod: { start: '2025-09-01T08:00:00', end: '2025-09-28T17:00:00' },
+    cronPeriod: { start: '2025-09-05T10:00:00', end: '2025-09-29T20:00:00' }
+  },
+  {
+    id: 2,
+    name: 'MarketWatch',
+    env: 'prod',
+    status: 'failed',
+    category: ['API', 'Cron'],
+    lastUpdated: '2025-09-30T04:12:01',
+    scripts: 12,
+    apis: 15,
+    urls: {
+      staging: '',
+      prod: 'https://market.example.com',
+      wms: 'https://wms.market.example.com'
+    },
+    scriptPeriod: { start: '2025-09-03T08:00:00', end: '2025-09-30T18:00:00' },
+    cronPeriod: { start: '2025-09-04T09:00:00', end: '2025-09-30T19:30:00' }
+  },
+  {
+    id: 3,
+    name: 'SoilSense',
+    env: 'staging',
+    status: 'active',
+    category: ['API', 'Script'],
+    lastUpdated: '2025-09-28T16:12:45',
+    scripts: 4,
+    apis: 3,
+    urls: {
+      staging: 'https://soil.stg',
+      prod: '',
+      wms: ''
+    },
+    scriptPeriod: { start: '2025-09-01T09:00:00', end: '2025-09-25T16:00:00' },
+    cronPeriod: { start: '-', end: '-' }
+  }
+];
+
+// Helper: format date
+function fmt(dateStr) {
+  if (!dateStr || dateStr === '-') return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '-';
+  return d.toLocaleString('en-IN', {
+    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+  });
+}
+
+// Render Table
+function renderProjectsTable(envFilter = 'all') {
+  const tbody = document.getElementById('projectsTableBody');
+  tbody.innerHTML = '';
+
+  const filtered = sampleProjects.filter(p => {
+    if (envFilter === 'all') return true;
+    if (envFilter === 'prod') return !!p.urls.prod;
+    if (envFilter === 'staging') return !!p.urls.staging;
+    if (envFilter === 'wms') return !!p.urls.wms;
+    return true;
+  });
+
+  filtered.forEach(p => {
+    // URL Column
+    let urlDisplay = '';
+    if (envFilter === 'all') {
+      urlDisplay = `
+        Stg: ${p.urls.staging || '-'}<br>
+        Prod: ${p.urls.prod || '-'}<br>
+        WMS: ${p.urls.wms || '-'}
+      `;
+    } else if (envFilter === 'prod') {
+      urlDisplay = p.urls.prod || '-';
+    } else if (envFilter === 'staging') {
+      urlDisplay = p.urls.staging || '-';
+    } else if (envFilter === 'wms') {
+      urlDisplay = p.urls.wms || '-';
+    }
+
+    // Env Column
+    let envDisplay = '';
+    if (envFilter === 'all') {
+      envDisplay = `
+        ${p.urls.staging ? '<span class="badge bg-info">Staging</span> ' : ''}
+        ${p.urls.prod ? '<span class="badge bg-success">Prod</span> ' : ''}
+        ${p.urls.wms ? '<span class="badge bg-warning text-dark">WMS</span>' : ''}
+      `;
+    } else if (envFilter === 'prod') {
+      envDisplay = '<span class="badge bg-success">Prod</span>';
+    } else if (envFilter === 'staging') {
+      envDisplay = '<span class="badge bg-info">Staging</span>';
+    } else if (envFilter === 'wms') {
+      envDisplay = '<span class="badge bg-warning text-dark">WMS</span>';
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.name}<div class="text-muted small">ID: ${p.id}</div></td>
+      <td class="small mono">${urlDisplay}</td>
+      <td>${envDisplay}</td>
+      <td>${p.category.join(', ')}</td>
+      <td><span class="badge ${p.status === 'active' ? 'bg-success' : 'bg-danger'}">${p.status}</span></td>
+      <td>${fmt(p.lastUpdated)}</td>
+      <td>${fmt(p.lastUpdated)}</td>
+      <td>${fmt(p.scriptPeriod.start)}</td>
+      <td>${fmt(p.scriptPeriod.end)}</td>
+      <td>${fmt(p.cronPeriod.start)}</td>
+      <td>${fmt(p.cronPeriod.end)}</td>
+      <td>${p.scripts}</td>
+      <td>${p.apis}</td>
+      <td><button class="btn btn-sm btn-outline-primary" onclick="openProject(${p.id})">
+        <i class="bi bi-box-arrow-up-right"></i> View
+      </button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Tab click handler
+document.querySelectorAll('#envTabs button').forEach(btn => {
+  btn.addEventListener('click', e => {
+    document.querySelectorAll('#envTabs .nav-link').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    const env = e.target.dataset.env;
+    renderProjectsTable(env);
+  });
+});
+
+// Initial load
+renderProjectsTable();
+
+function openProject(id) {
+  alert(`Opening project ID: ${id}`);
+}
+</script>
+
+</body>
+</html>

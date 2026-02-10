@@ -1,0 +1,1116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Project Monitoring Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+      .tab_wrap .nav-link.active {
+        background: #0d6efd;
+        color: #fff;
+        border-radius: 4px 7px;
+      }
+      ul#myTab {
+        border-bottom: 0;
+      }
+      .tab_wrap .nav-link
+      {
+        border: 1px solid;
+        border-radius: 4px 7px;
+      } 
+      .table thead th {
+      vertical-align: middle !important;
+      text-align: center;
+      white-space: nowrap;
+      }
+      .table thead tr:nth-child(2) th {
+      background-color: #f9f9f9;
+      font-weight: 500;
+      }
+      .table-responsive {
+      overflow-x: auto; /* explicitly allow horizontal scroll */
+      }
+      .table-fixed {
+      width: 100%;      /* make table take container width */
+      min-width: 800px; /* optional: set minimum width to trigger scroll */
+      }
+      main .table-responsive {
+      overflow-x: auto;
+      display: grid;    
+      }
+      .table-responsive {
+      -webkit-overflow-scrolling: touch;
+      }
+      th, td 
+      {
+      white-space: nowrap;
+      vertical-align: middle;
+      } 
+      /* ✅ Sidebar collapses into offcanvas for mobile */
+      @media (max-width: 991px) {
+      .no-flex {
+      display: initial !important;
+      }
+      .no-view {
+      display: none;
+      }
+      .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 100%;
+      z-index: 1050;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+      }
+      .sidebar.active {
+      transform: translateX(0);
+      }
+      .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      z-index: 1040;
+      }
+      .sidebar-overlay.show {
+      display: block;
+      }
+      }
+      /* ✅ Table responsive tweaks */
+      @media (max-width: 576px) {
+      table thead th:nth-child(5),
+      table thead th:nth-child(6),
+      table tbody td:nth-child(5),
+      table tbody td:nth-child(6) {
+      display: none;
+      }
+      }
+      :root{
+      --card-radius: 14px;
+      --accent: #6f42c1;
+      --muted: #6c757d;
+      }
+      #recentChanges li {
+      margin-bottom: 5px;
+      }
+      body{background:#f5f7fb;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+      .card-soft{border-radius:var(--card-radius); box-shadow: 0 6px 18px rgba(18,24,40,0.06);display: grid
+      ;} 
+      .status-chip{padding:4px 8px;border-radius:999px;font-weight:600;font-size:0.8rem}
+      .status-success{background:rgba(34,197,94,0.12);color:#16a34a}
+      .status-fail{background:rgba(239,68,68,0.12);color:#dc2626}
+      .status-warn{background:rgba(250,204,21,0.12);color:#ca8a04}
+      .table-fixed tbody tr td{vertical-align:middle}
+      .sidebar{min-width:240px;background:linear-gradient(180deg,#ffffff,#f8f9ff);border-right:1px solid #eef2ff}
+      .nav-pill .nav-link{border-radius:8px}
+      .muted-small{font-size:0.85rem;color:var(--muted)}
+      .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace}
+      .small-card{padding:0.8rem}
+      .kbd-like{background:#eef2ff;padding:6px 8px;border-radius:6px;font-weight:600}
+      .collapse-row{background:#fbfbff}
+    </style>
+  </head>
+  <body>
+    <div class="d-flex no-flex">
+      <!-- Sidebar -->
+      <aside class="sidebar p-3 vh-100">
+        <div class="d-flex align-items-center gap-2 mb-4">
+          <div class="rounded-3 bg-white p-2 shadow-sm"><i class="bi bi-grid-fill fs-4 text-primary"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">Monitoring Console</h6>
+            <small class="muted-small">Projects & Services</small>
+          </div>
+        </div>
+        <nav class="nav flex-column">
+          <a class="nav-link active" href="#dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+          <!-- <a class="nav-link" href="#projects"><i class="bi bi-kanban me-2"></i> Projects</a>
+            <a class="nav-link" href="#gis"><i class="bi bi-map me-2"></i> GIS Layers</a> -->
+          <hr>
+          <small class="text-uppercase text-muted">Quick filters</small>
+          <!-- <div class="mt-2">
+            <button class="btn btn-sm btn-outline-primary w-100 mb-2" onclick="applyQuickFilter('failed')">Failed Jobs</button>
+            <button class="btn btn-sm btn-outline-secondary w-100" onclick="applyQuickFilter('staging')">Staging</button>
+          </div> -->
+
+          <!-- Quick Filters Panel -->
+<div class="quick-filters p-4 bg-light rounded shadow-sm">
+  <!-- <h5 class="mb-3">Quick Filters</h5> -->
+
+
+  <!-- Status Filter -->
+  <div class="mb-3">
+    <label class="form-label fw-bold d-block">Status</label>
+    <div class="btn-group" role="group" aria-label="Status Filter">
+      <button type="button" class="btn btn-outline-success">Active</button>
+      <button type="button" class="btn btn-outline-danger">Failed</button>
+    </div>
+  </div>
+
+  <!-- Category Filter -->
+  <div class="mb-3">
+    <label class="form-label fw-bold">Category</label>
+    <div class="btn-group" role="group" aria-label="Category Filter">
+      <button type="button" class="btn btn-outline-secondary">API</button>
+      <button type="button" class="btn btn-outline-secondary">Cron</button>
+      <button type="button" class="btn btn-outline-secondary">Script</button>
+    </div>
+  </div>
+
+  <!-- Project Search -->
+  <div class="mb-3">
+    <label class="form-label fw-bold">Search Project</label>
+    <input type="text" class="form-control" placeholder="Search by name or ID">
+  </div>
+
+  <!-- Last Update Filter (optional) -->
+  <div class="mb-3">
+    <label class="form-label fw-bold">Last Update</label>
+    <div class="btn-group" role="group" aria-label="Last Update Filter">
+      <button type="button" class="btn btn-outline-info">Today</button>
+      <button type="button" class="btn btn-outline-info">Last 7 days</button>
+      <button type="button" class="btn btn-outline-info">Last 30 days</button>
+    </div>
+  </div>
+
+  <!-- Script / Job Health -->
+  <div class="mb-3">
+    <label class="form-label fw-bold">Script / Job Health</label>
+    <div class="d-flex gap-2 flex-wrap">
+      <button type="button" class="btn btn-outline-dark">Total Scripts</button>
+      <button type="button" class="btn btn-outline-danger">Failed Jobs Today</button>
+      <button type="button" class="btn btn-outline-warning">APIs Unhealthy</button>
+    </div>
+  </div>
+</div>
+
+
+        </nav>
+      </aside>
+      <!-- Main -->
+      <main class="flex-grow-1 p-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h3 class="mb-0">Projects Dashboard</h3>
+            <small class="text-muted">Overview of projects, scripts, schedulers and APIs</small>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            <div class="kbd-like">ENV: <span id="currentEnv" class="ms-2 mono">All</span></div>
+            <button class="btn btn-primary no-view" onclick="refreshAll()"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
+            <button class="btn btn-outline-primary d-lg-none" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+            </button>
+          </div>
+        </div>
+        <!-- Dashboard Cards -->
+        <div id="dashboardView">
+          <div class="row g-3 mb-4">
+            <!-- <div class="col-md-3">
+              <div class="card card-soft small-card">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <small class="text-muted">Total Projects</small>
+                    <h4 id="cardProjects">0</h4>
+                  </div>
+                  <i class="bi bi-folder fs-2 text-secondary"></i>
+                </div>
+              </div>
+              </div>
+              <div class="col-md-3">
+              <div class="card card-soft small-card">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <small class="text-muted">Total Scripts</small>
+                    <h4 id="cardScripts">0</h4>
+                  </div>
+                  <i class="bi bi-file-code fs-2 text-secondary"></i>
+                </div>
+              </div>
+              </div>
+              <div class="col-md-3">
+              <div class="card card-soft small-card">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <small class="text-muted">Failed Jobs Today</small>
+                    <h4 id="cardFailed">0</h4>
+                  </div>
+                  <i class="bi bi-exclamation-octagon fs-2 text-danger"></i>
+                </div>
+              </div>
+              </div>
+              <div class="col-md-3">
+              <div class="card card-soft small-card">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <small class="text-muted">APIs Unhealthy</small>
+                    <h4 id="cardApiFail">0</h4>
+                  </div>
+                  <i class="bi bi-plug fs-2 text-warning"></i>
+                </div>
+              </div>
+              </div> -->
+            <div class="col-md-3">
+              <div class="card card-soft small-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <small class="text-muted">Total Projects</small>
+                    <h4 id="cardProjects">3</h4>
+                  </div>
+                  <i class="bi bi-folder fs-2 text-secondary"></i>
+                </div>
+                <!-- Staging / Prod breakdown -->
+                <div class="d-flex gap-2">
+                  <span class="badge bg-primary">Stg: <span id="cardProjectsStg">2</span></span>
+                  <span class="badge bg-success">Prod: <span id="cardProjectsProd">1</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card card-soft small-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <small class="text-muted">Total Scripts</small>
+                    <h4 id="cardProjects">22</h4>
+                  </div>
+                  <i class="bi bi-file-code fs-2 text-secondary"></i>
+                </div>
+                <!-- Staging / Prod breakdown -->
+                <div class="d-flex gap-2">
+                  <span class="badge bg-primary">Stg: <span id="cardScriptsStg">17</span></span>
+                  <span class="badge bg-success">Prod: <span id="cardScriptsProd">5</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card card-soft small-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <small class="text-muted">Failed Jobs Today</small>
+                    <h4 id="cardProjects">10</h4>
+                  </div>
+                  <i class="bi bi-file-code fs-2 text-secondary"></i>
+                </div>
+                <!-- Staging / Prod breakdown -->
+                <div class="d-flex gap-2">
+                  <span class="badge bg-primary">Stg: <span id="cardFailedStg">7</span></span>
+                  <span class="badge bg-success">Prod: <span id="cardFailedProd">3</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card card-soft small-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <small class="text-muted">APIs Unhealthy</small>
+                    <h4 id="cardProjects">15</h4>
+                  </div>
+                  <i class="bi bi-file-code fs-2 text-secondary"></i>
+                </div>
+                <!-- Staging / Prod breakdown -->
+                <div class="d-flex gap-2">
+                  <span class="badge bg-primary">Stg: <span id="cardApiFailStg">10</span></span> 
+                  <span class="badge bg-success">Prod: <span id="cardApiFailProd">5</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Projects table -->
+          <div class="card card-soft p-3 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0">Projects</h5>
+              <div class="d-flex gap-2">
+                <input id="searchProject" class="form-control form-control-sm" placeholder="Search project..." oninput="renderProjectsTable()" />
+                <select id="filterEnv" class="form-select form-select-sm" onchange="applyFilters()">
+                  <option value="all">All Envs</option>
+                  <option value="staging">Staging</option>
+                  <option value="prod">Prod</option>
+                </select>
+              </div>
+            </div>
+
+
+            <div class="tab_wrap">
+              <ul class="nav nav-tabs" id="myTab" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true"><i class="bi bi-globe2 me-1"></i> All</button>
+                  </li>
+                  <li class="nav-item mx-2" role="presentation">
+                    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false"><i class="bi bi-building-check me-1 text-success"></i> Prod</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button" role="tab" aria-controls="contact-tab-pane" aria-selected="false"><i class="bi bi-hammer me-1 text-info"></i> staging</button>
+                  </li>
+                  <li class="nav-item mx-2" role="presentation">
+                    <button class="nav-link" id="disabled-tab" data-bs-toggle="tab" data-bs-target="#disabled-tab-pane" type="button" role="tab" aria-controls="disabled-tab-pane" aria-selected="false"><i class="bi bi-map-fill me-1 text-warning"></i> WMS</button>
+                  </li>
+                </ul>
+                <div class="tab-content mt-2" id="myTabContent">
+                  <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+                    <div class="table-responsive">
+              <table class="table table-hover table-fixed mb-0">
+                <thead>
+                  <tr>
+                    <th rowspan="2">Project</th>
+                    <th rowspan="2">URL</th>
+                    <th rowspan="2">Env</th>
+                    <th rowspan="2">Category</th>
+                    <th rowspan="2">Current Status</th>
+                    <th rowspan="2">Last Updated by Log</th>
+                    <th rowspan="2">Last Updated in DB</th>
+                    <th colspan="2" class="text-center border-start border-end">Script Period</th>
+                    <th colspan="2" class="text-center border-start border-end">Cron Job Period</th>
+                    <th rowspan="2">Scripts</th>
+                    <th rowspan="2">APIs</th>
+                    <th rowspan="2">Actions</th>
+                  </tr>
+                  <tr>
+                    <th class="text-center small">Start</th>
+                    <th class="text-center small">End</th>
+                    <th class="text-center small">Start</th>
+                    <th class="text-center small">End</th>
+                  </tr>
+                </thead>
+                <!-- <tbody id="projectsTableBody"></tbody> -->
+                <tbody id="projectsTableBody1"><tr>
+      <td>AgriConnect<div class="text-muted small">ID: 1</div></td>
+      <td class="small mono">
+        Stg: https://staging.agri.local<br>
+        Prod: https://agri.example.com<br>
+        WMS: https://wms.agri.example.com
+      </td>
+      <td>
+        <span class="badge bg-info">Staging</span> 
+        <span class="badge bg-success">Prod</span> 
+        <span class="badge bg-warning text-dark">WMS</span>
+      </td>
+      <td>API</td>
+      <td><span class="badge bg-success">active</span></td>
+      <td>29 Sept, 10:23 am</td>
+      <td>29 Sept, 10:23 am</td>
+      <td>01 Sept, 08:00 am</td>
+      <td>28 Sept, 05:00 pm</td>
+      <td>05 Sept, 10:00 am</td>
+      <td>29 Sept, 08:00 pm</td>
+      <td>6</td>
+      <td>8</td>
+      <td><button class="btn btn-sm btn-outline-primary" onclick="openProject(1)">
+        <i class="bi bi-box-arrow-up-right"></i> View
+      </button></td>
+    </tr><tr>
+      <td>MarketWatch<div class="text-muted small">ID: 2</div></td>
+      <td class="small mono">
+        Stg: -<br>
+        Prod: https://market.example.com<br>
+        WMS: https://wms.market.example.com
+      </td>
+      <td>
+        
+        <span class="badge bg-success">Prod</span> 
+        <span class="badge bg-warning text-dark">WMS</span>
+      </td>
+      <td>Cron</td>
+      <td><span class="badge bg-danger">failed</span></td>
+      <td>30 Sept, 04:12 am</td>
+      <td>30 Sept, 04:12 am</td>
+      <td>03 Sept, 08:00 am</td>
+      <td>30 Sept, 06:00 pm</td>
+      <td>04 Sept, 09:00 am</td>
+      <td>30 Sept, 07:30 pm</td>
+      <td>12</td>
+      <td>15</td>
+      <td><button class="btn btn-sm btn-outline-primary" onclick="openProject(2)">
+        <i class="bi bi-box-arrow-up-right"></i> View
+      </button></td>
+    </tr><tr>
+      <td>SoilSense<div class="text-muted small">ID: 3</div></td>
+      <td class="small mono">
+        Stg: https://soil.stg<br>
+        Prod: -<br>
+        WMS: -
+      </td>
+      <td>
+        <span class="badge bg-info">Staging</span> 
+        
+        
+      </td>
+      <td>Script</td>
+      <td><span class="badge bg-success">active</span></td>
+      <td>28 Sept, 04:12 pm</td>
+      <td>28 Sept, 04:12 pm</td>
+      <td>01 Sept, 09:00 am</td>
+      <td>25 Sept, 04:00 pm</td>
+      <td>-</td>
+      <td>-</td>
+      <td>4</td>
+      <td>3</td>
+      <td><button class="btn btn-sm btn-outline-primary" onclick="openProject(3)">
+        <i class="bi bi-box-arrow-up-right"></i> View
+      </button></td>
+    </tr></tbody>
+              </table>
+            </div>
+                  </div>
+                  <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+                    <div class="table-responsive">
+              <table class="table table-hover table-fixed mb-0">
+                <thead>
+                  <tr>
+                    <th rowspan="2">Project</th>
+                    <th rowspan="2">URL</th>
+                    <th rowspan="2">Env</th>
+                    <th rowspan="2">Category</th>
+                    <th rowspan="2">Current Status</th>
+                    <th rowspan="2">Last Updated by Log</th>
+                    <th rowspan="2">Last Updated in DB</th>
+                    <th colspan="2" class="text-center border-start border-end">Script Period</th>
+                    <th colspan="2" class="text-center border-start border-end">Cron Job Period</th>
+                    <th rowspan="2">Scripts</th>
+                    <th rowspan="2">APIs</th>
+                    <th rowspan="2">Actions</th>
+                  </tr>
+                  <tr>
+                    <th class="text-center small">Start</th>
+                    <th class="text-center small">End</th>
+                    <th class="text-center small">Start</th>
+                    <th class="text-center small">End</th>
+                  </tr>
+                </thead>
+                <tbody id="projectsTableBody2"><tr>
+      <td>AgriConnect<div class="text-muted small">ID: 1</div></td>
+      <td class="small mono">https://agri.example.com</td>
+      <td><span class="badge bg-success">Prod</span></td>
+      <td>API, Script, Cron</td>
+      <td><span class="badge bg-success">active</span></td>
+      <td>29 Sept, 10:23 am</td>
+      <td>29 Sept, 10:23 am</td>
+      <td>01 Sept, 08:00 am</td>
+      <td>28 Sept, 05:00 pm</td>
+      <td>05 Sept, 10:00 am</td>
+      <td>29 Sept, 08:00 pm</td>
+      <td>6</td>
+      <td>8</td>
+      <td><button class="btn btn-sm btn-outline-primary" onclick="openProject(1)">
+        <i class="bi bi-box-arrow-up-right"></i> View
+      </button></td>
+    </tr><tr>
+      <td>MarketWatch<div class="text-muted small">ID: 2</div></td>
+      <td class="small mono">https://market.example.com</td>
+      <td><span class="badge bg-success">Prod</span></td>
+      <td>API, Cron</td>
+      <td><span class="badge bg-danger">failed</span></td>
+      <td>30 Sept, 04:12 am</td>
+      <td>30 Sept, 04:12 am</td>
+      <td>03 Sept, 08:00 am</td>
+      <td>30 Sept, 06:00 pm</td>
+      <td>04 Sept, 09:00 am</td>
+      <td>30 Sept, 07:30 pm</td>
+      <td>12</td>
+      <td>15</td>
+      <td><button class="btn btn-sm btn-outline-primary" onclick="openProject(2)">
+        <i class="bi bi-box-arrow-up-right"></i> View
+      </button></td>
+    </tr></tbody>
+              </table>
+            </div>
+                  </div>
+                  <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">
+                    <div class="table-responsive">
+              <table class="table table-hover table-fixed mb-0">
+                <thead>
+                  <tr>
+                    <th rowspan="2">Project</th>
+                    <th rowspan="2">URL</th>
+                    <th rowspan="2">Env</th>
+                    <th rowspan="2">Category</th>
+                    <th rowspan="2">Current Status</th>
+                    <th rowspan="2">Last Updated by Log</th>
+                    <th rowspan="2">Last Updated in DB</th>
+                    <th colspan="2" class="text-center border-start border-end">Script Period</th>
+                    <th colspan="2" class="text-center border-start border-end">Cron Job Period</th>
+                    <th rowspan="2">Scripts</th>
+                    <th rowspan="2">APIs</th>
+                    <th rowspan="2">Actions</th>
+                  </tr>
+                  <tr>
+                    <th class="text-center small">Start</th>
+                    <th class="text-center small">End</th>
+                    <th class="text-center small">Start</th>
+                    <th class="text-center small">End</th>
+                  </tr>
+                </thead>
+                <tbody id="projectsTableBody3"><tr>
+      <td>AgriConnect<div class="text-muted small">ID: 1</div></td>
+      <td class="small mono">https://staging.agri.local</td>
+      <td><span class="badge bg-info">Staging</span></td>
+      <td>API, Script, Cron</td>
+      <td><span class="badge bg-success">active</span></td>
+      <td>29 Sept, 10:23 am</td>
+      <td>29 Sept, 10:23 am</td>
+      <td>01 Sept, 08:00 am</td>
+      <td>28 Sept, 05:00 pm</td>
+      <td>05 Sept, 10:00 am</td>
+      <td>29 Sept, 08:00 pm</td>
+      <td>6</td>
+      <td>8</td>
+      <td><button class="btn btn-sm btn-outline-primary" onclick="openProject(1)">
+        <i class="bi bi-box-arrow-up-right"></i> View
+      </button></td>
+    </tr><tr>
+      <td>SoilSense<div class="text-muted small">ID: 3</div></td>
+      <td class="small mono">https://soil.stg</td>
+      <td><span class="badge bg-info">Staging</span></td>
+      <td>API, Script</td>
+      <td><span class="badge bg-success">active</span></td>
+      <td>28 Sept, 04:12 pm</td>
+      <td>28 Sept, 04:12 pm</td>
+      <td>01 Sept, 09:00 am</td>
+      <td>25 Sept, 04:00 pm</td>
+      <td>-</td>
+      <td>-</td>
+      <td>4</td>
+      <td>3</td>
+      <td><button class="btn btn-sm btn-outline-primary" onclick="openProject(3)">
+        <i class="bi bi-box-arrow-up-right"></i> View
+      </button></td>
+    </tr></tbody>
+              </table>
+            </div>
+                  </div>
+                  <div class="tab-pane fade" id="disabled-tab-pane" role="tabpanel" aria-labelledby="disabled-tab" tabindex="0">
+                    <div class="table-responsive">
+              <table class="table table-hover table-fixed mb-0">
+                <thead>
+                  <tr>
+                    <th rowspan="2">Project</th>
+                    <th rowspan="2">URL</th>
+                    <th rowspan="2">Env</th>
+                    <th rowspan="2">Category</th>
+                    <th rowspan="2">Current Status</th>
+                    <th rowspan="2">Last Updated by Log</th>
+                    <th rowspan="2">Last Updated in DB</th>
+                    <th colspan="2" class="text-center border-start border-end">Script Period</th>
+                    <th colspan="2" class="text-center border-start border-end">Cron Job Period</th>
+                    <th rowspan="2">Scripts</th>
+                    <th rowspan="2">APIs</th>
+                    <th rowspan="2">Actions</th>
+                  </tr>
+                  <tr>
+                    <th class="text-center small">Start</th>
+                    <th class="text-center small">End</th>
+                    <th class="text-center small">Start</th>
+                    <th class="text-center small">End</th>
+                  </tr>
+                </thead>
+                <tbody id="projectsTableBody4"><tr>
+      <td>AgriConnect<div class="text-muted small">ID: 1</div></td>
+      <td class="small mono">https://wms.agri.example.com</td>
+      <td><span class="badge bg-warning text-dark">WMS</span></td>
+      <td>API, Script, Cron</td>
+      <td><span class="badge bg-success">active</span></td>
+      <td>29 Sept, 10:23 am</td>
+      <td>29 Sept, 10:23 am</td>
+      <td>01 Sept, 08:00 am</td>
+      <td>28 Sept, 05:00 pm</td>
+      <td>05 Sept, 10:00 am</td>
+      <td>29 Sept, 08:00 pm</td>
+      <td>6</td>
+      <td>8</td>
+      <td><button class="btn btn-sm btn-outline-primary" onclick="openProject(1)">
+        <i class="bi bi-box-arrow-up-right"></i> View
+      </button></td>
+    </tr><tr>
+      <td>MarketWatch<div class="text-muted small">ID: 2</div></td>
+      <td class="small mono">https://wms.market.example.com</td>
+      <td><span class="badge bg-warning text-dark">WMS</span></td>
+      <td>API, Cron</td>
+      <td><span class="badge bg-danger">failed</span></td>
+      <td>30 Sept, 04:12 am</td>
+      <td>30 Sept, 04:12 am</td>
+      <td>03 Sept, 08:00 am</td>
+      <td>30 Sept, 06:00 pm</td>
+      <td>04 Sept, 09:00 am</td>
+      <td>30 Sept, 07:30 pm</td>
+      <td>12</td>
+      <td>15</td>
+      <td><button class="btn btn-sm btn-outline-primary" onclick="openProject(2)">
+        <i class="bi bi-box-arrow-up-right"></i> View
+      </button></td>
+    </tr></tbody>
+              </table>
+            </div>
+                  </div>
+                </div> 
+            </div>
+
+
+            
+
+
+          </div>
+        </div>
+        <!-- Project Details View (hidden by default) -->
+        <div id="projectView" style="display:none">
+          <div class="card card-soft p-3 mb-3">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h4 id="projTitle">Project</h4>
+                <small id="projUrls" class="muted-small"></small>
+              </div>
+              <div>
+                <button class="btn btn-outline-secondary" onclick="backToDashboard()"><i class="bi bi-arrow-left"></i> Back</button>
+                <span class="ms-2 muted-small">Last pull: <span id="projLastPull">-</span></span>
+              </div>
+            </div>
+          </div>
+          <ul class="nav nav-pills mb-3" id="projTabs" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#scriptsTab">Scripts</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#schedulerTab">Scheduler</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#extApiTab">External APIs</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#intApiTab">Internal APIs</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#gisTab">GIS Layers</button></li>
+          </ul>
+          <div class="tab-content">
+            <!-- Scripts Tab -->
+            <div class="tab-pane fade show active" id="scriptsTab">
+              <div class="card card-soft p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="mb-0">Scripts</h6>
+                  <div class="muted-small">Total: <span id="scriptsCount">0</span></div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-sm table-hover mb-0">
+                    <thead>
+                      <tr>
+                        <th>Script Name</th>
+                        <th>Trigger</th>
+                        <th>Cron</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Last Updated</th>
+                        <th>Functions</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="scriptsTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!-- Scheduler Tab -->
+            <div class="tab-pane fade" id="schedulerTab">
+              <div class="card card-soft p-3">
+                <h6>Scheduler & Cron Jobs</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0">
+                    <thead>
+                      <tr>
+                        <th>S.No</th>
+                        <th>Activity Name</th>
+                        <th>Trigger Info</th>
+                        <th>Last Executed Time</th>
+                        <th>Service</th>
+                        <th>Time Taken (ms)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="schedulerBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!-- External APIs -->
+            <div class="tab-pane fade" id="extApiTab">
+              <div class="card card-soft p-3">
+                <h6>External APIs</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0">
+                    <thead>
+                      <tr>
+                        <th>S.No</th>
+                        <th>API Name</th>
+                        <th>URL</th>
+                        <th>Response Time (ms)</th>
+                        <th>Last Successfully Verified</th>
+                        <th>Last Verified</th>
+                        <th>Services</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                      </tr>
+                    </thead>
+                    <tbody id="extApiBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!-- Internal APIs -->
+            <div class="tab-pane fade" id="intApiTab">
+              <div class="card card-soft p-3">
+                <h6>Internal APIs</h6>
+                <ul class="nav nav-tabs mb-3" id="internalApiTabsList"></ul>
+                <div id="internalApiTabsContent"></div>
+              </div>
+            </div>
+            <!-- GIS -->
+            <div class="tab-pane fade" id="gisTab">
+              <div class="card card-soft p-3">
+                <h6>GIS Layers</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0">
+                    <thead>
+                      <tr>
+                        <th>Layer Name</th>
+                        <th>WMS URL</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="gisBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // ---------- Sample Data ----------
+      const sampleProjects = [
+      {
+      id: 1,
+      name: 'AgriConnect',
+      env: 'staging',
+      status: 'active',
+      lastUpdated: '2025-09-29T10:23:12',
+      scripts: 6,
+      apis: 8,
+      urls: {
+        staging: 'https://staging.agri.local',
+        prod: 'https://agri.example.com',
+        wms: 'https://wms.agri.example.com'
+      },
+      category: ['API'],
+      scriptPeriod: { start: '2025-09-29T06:00:00', end: '2025-09-29T18:00:00' },
+      cronPeriod: { start: '2025-09-29T06:30:00', end: '2025-09-29T17:45:00' }
+      },
+      {
+      id: 2,
+      name: 'MarketWatch',
+      env: 'prod',
+      status: 'failed',
+      lastUpdated: '2025-09-30T04:12:01',
+      scripts: 12,
+      apis: 15,
+      urls: {
+        staging: '',
+        prod: 'https://market.example.com',
+        wms: 'https://wms.market.example.com'
+      },
+      category: ['Script'],
+      scriptPeriod: { start: '2025-09-30T08:00:00', end: '2025-09-30T20:00:00' },
+      cronPeriod: { start: '2025-09-30T09:00:00', end: '2025-09-30T19:30:00' }
+      },
+      {
+      id: 3,
+      name: 'SoilSense',
+      env: 'staging',
+      status: 'active',
+      lastUpdated: '2025-09-28T16:12:45',
+      scripts: 4,
+      apis: 3,
+      urls: {
+        staging: 'https://soil.stg',
+        prod: '',
+        wms: ''
+      },
+      category: ['Map Service'],
+      scriptPeriod: { start: '2025-09-28T07:00:00', end: '2025-09-28T19:00:00' },
+      cronPeriod: { start: '2025-09-28T07:15:00', end: '2025-09-28T18:45:00' }
+      }
+      ];
+      
+      
+      
+      const sampleScripts = {
+        1: [
+          {name:'ingest_crops.sql',trigger:'manual',cron:'0 2 * * *',start:'02:00',end:'02:03',lastUpdated:'2025-09-29T02:03:00',functions:['fn_ingest','sp_notify'],status:'success'},
+          {name:'calculate_rates.py',trigger:'cron',cron:'0 */6 * * *',start:'06:00',end:'06:00',lastUpdated:'2025-09-30T06:00:03',functions:['calcRates'],status:'failed'},
+          {name:'push_to_queue.sh',trigger:'api',cron:'-',start:'11:00',end:'11:00',lastUpdated:'2025-09-27T11:00:00',functions:[],status:'success'}
+        ],
+        2: [
+          {name:'sync_prices.py',trigger:'cron',cron:'*/15 * * * *',start:'00:00',end:'00:00',lastUpdated:'2025-09-30T04:00:00',functions:['syncPrices'],status:'failed'}
+        ],
+        3: [
+          {name:'collect_soil.py',trigger:'cron',cron:'0 1 * * *',start:'01:00',end:'01:01',lastUpdated:'2025-09-28T01:02:03',functions:['collectSoil'],status:'success'}
+        ]
+      };
+      
+      const sampleScheduler = {
+        1:[{act:'Crop ingest',trigger:'cron',lastExec:'2025-09-29T02:03:00',service:'ingest',timeTaken:180000},{act:'Rate calc',trigger:'cron',lastExec:'2025-09-30T06:00:03',service:'calc',timeTaken:230000}],
+        2:[{act:'Price sync',trigger:'cron',lastExec:'2025-09-30T04:00:00',service:'sync',timeTaken:120000}],
+        3:[{act:'Soil collect',trigger:'cron',lastExec:'2025-09-28T01:02:03',service:'collect',timeTaken:45000}]
+      };
+      
+      const sampleExtApis = {
+        1:[{name:'WeatherAPI',url:'https://api.weather/v1',res:340,lastGood:'2025-09-29T08:00:00',lastCheck:'2025-09-30T08:00:00',service:'weather','remarks':'ok'},{name:'MarketRates',url:'https://api.rates/v2',res:1200,lastGood:'2025-09-25T05:00:00',lastCheck:'2025-09-30T05:00:00',service:'rates','remarks':'slow'}],
+        2:[{name:'PayGateway',url:'https://payments.example',res:85,lastGood:'2025-09-30T03:59:00',lastCheck:'2025-09-30T04:00:00',service:'payments','remarks':'ok'}],
+        3:[]
+      };
+      
+      const sampleInternalApis = {
+        1:{'Tab1':[{name:'intGetCrops',url:'/api/crops',res:45,svc:'ingest',remarks:'ok'},{name:'intListFarmers',url:'/api/farmers',res:60,svc:'db',remarks:'ok'}],'Tab2':[], 'Tab3':[]},
+        2:{'Tab1':[{name:'intPrices',url:'/api/prices',res:210,svc:'sync',remarks:'slow'}],'Tab2':[], 'Tab3':[]},
+        3:{'Tab1':[], 'Tab2':[], 'Tab3':[]}
+      };
+      
+      const sampleGis = {
+        1:[{layer:'SoilMap',wms:'https://wms.agri/soil',type:'Raster',status:'active'},{layer:'ParcelBoundaries',wms:'https://wms.agri/parcel',type:'Vector',status:'active'}],
+        2:[{layer:'MarketZones',wms:'https://wms.market/zones',type:'Vector',status:'active'}],
+        3:[]
+      };
+      
+      // ---------- Utilities ----------
+      function fmt(dt){ if(!dt) return '-'; const d=new Date(dt); return d.toLocaleString(); }
+      function statusClass(s){ return s==='success'?'status-success':s==='failed'?'status-fail':'status-warn' }
+      
+      // ---------- Render Dashboard ----------
+      
+      function renderProjectsTable() {
+      const tbody = document.getElementById('projectsTableBody');
+      tbody.innerHTML = '';
+      
+      const q = document.getElementById('searchProject').value.toLowerCase();
+      const envFilter = document.getElementById('filterEnv').value;
+      
+      const filtered = sampleProjects.filter(p =>
+      (envFilter === 'all' || p.env === envFilter) &&
+      p.name.toLowerCase().includes(q)
+      ); 
+      
+      filtered.forEach(p => {
+      const tr = document.createElement('tr');
+      
+      tr.innerHTML = `
+      <td>${p.name}<div class="muted-small">ID: ${p.id}</div></td>
+      <td class="mono small">
+        Stg: ${p.urls.staging || '-'}<br>
+        Prod: ${p.urls.prod || '-'}<br>
+        WMS: ${p.urls.wms || '-'}
+      </td>
+      <td>${p.env}</td>
+      <td>${p.category.join(', ')}</td>
+      <td><span class="status-chip ${p.status === 'active' ? 'status-success' : 'status-fail'}">${p.status}</span></td>
+      <td>${fmt(p.lastUpdated)}</td>
+      <td>${fmt(p.lastUpdated)}</td>
+      <td>${fmt(p.scriptPeriod.start)}</td>
+      <td>${fmt(p.scriptPeriod.end)}</td>
+      <td>${fmt(p.cronPeriod.start)}</td>
+      <td>${fmt(p.cronPeriod.end)}</td>
+      <td>${p.scripts}</td>
+      <td>${p.apis}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" onclick="openProject(${p.id})">
+          <i class="bi bi-box-arrow-up-right"></i> View
+        </button>
+      </td>
+      `;
+      
+      tbody.appendChild(tr);
+      });
+      
+      
+      
+      // --- Dashboard KPI Update ---
+      document.getElementById('cardProjects').innerText = sampleProjects.length;
+      document.getElementById('cardScripts').innerText = sampleProjects.reduce((s, p) => s + p.scripts, 0);
+      const failedJobs = Object.values(sampleScripts).flat().filter(s => s.status === 'failed').length;
+      document.getElementById('cardFailed').innerText = failedJobs;
+      const apiFails = Object.values(sampleExtApis).flat().filter(a => a.remarks === 'slow').length;
+      document.getElementById('cardApiFail').innerText = apiFails;
+      }
+      
+      
+      function applyQuickFilter(key){
+        if(key==='failed'){ document.getElementById('filterEnv').value='all'; document.getElementById('searchProject').value=''; renderProjectsTable();
+          // highlight projects with failed status
+          const rows = document.querySelectorAll('#projectsTableBody tr'); rows.forEach(r=>{ if(r.innerText.toLowerCase().includes('failed')) r.classList.add('table-danger'); })
+        }
+        if(key==='staging'){ document.getElementById('filterEnv').value='staging'; applyFilters(); }
+      }
+      
+      
+      // Recent Changes & Quick Status
+      function renderRecent(){
+        const list = document.getElementById('recentChanges'); list.innerHTML='';
+        const items = Object.values(sampleScripts).flat().slice(0,6);
+        items.forEach(it=>{ const li=document.createElement('li'); li.innerHTML=`<strong>${it.name}</strong> — ${fmt(it.lastUpdated)} <span class="ms-2 badge bg-secondary">${it.status}</span>`; list.appendChild(li); });
+      
+        const ql = document.getElementById('quickStatusList'); ql.innerHTML='';
+        sampleProjects.forEach(p=>{ const div=document.createElement('div'); div.className='d-flex justify-content-between align-items-center py-2 border-bottom'; div.innerHTML=`<div><strong>${p.name}</strong><div class="muted-small">${p.env} • ${p.scripts} scripts</div></div><div><span class="status-chip ${p.status==='active'?'status-success':'status-fail'}">${p.status}</span></div>`; ql.appendChild(div); });
+      }
+      
+      // ---------- Project View ----------
+      function openProject(id){
+        window.currentProjectId = id;
+        const proj = sampleProjects.find(p=>p.id===id);
+        document.getElementById('dashboardView').style.display='none';
+        document.getElementById('projectView').style.display='block';
+        document.getElementById('projTitle').innerText = proj.name + ' • ' + proj.env.toUpperCase();
+        document.getElementById('projUrls').innerHTML = `Staging: ${proj.urls.staging || '-'} &nbsp; | &nbsp; Prod: ${proj.urls.prod || '-'} &nbsp; | &nbsp; WMS: ${proj.urls.wms || '-'}`;
+        document.getElementById('projLastPull').innerText = fmt(proj.lastUpdated);
+      
+        // Scripts
+        const sbody = document.getElementById('scriptsTableBody'); sbody.innerHTML='';
+        const scripts = sampleScripts[id] || [];
+        document.getElementById('scriptsCount').innerText = scripts.length;
+        scripts.forEach(s=>{
+          const tr = document.createElement('tr');
+          const funcs = s.functions.length? s.functions.join(', ') : '-';
+          tr.innerHTML = `
+            <td>${s.name}</td>
+            <td>${s.trigger}</td>
+            <td><code class="mono">${s.cron}</code></td>
+            <td>${s.start}</td>
+            <td>${s.end}</td>
+            <td>${fmt(s.lastUpdated)}</td>
+            <td>${funcs}</td>
+            <td><span class="status-chip ${statusClass(s.status)}">${s.status}</span></td>
+          `;
+          sbody.appendChild(tr);
+        });
+      
+        // Scheduler
+        const schBody = document.getElementById('schedulerBody'); schBody.innerHTML='';
+        (sampleScheduler[id]||[]).forEach((r,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${r.act}</td><td>${r.trigger}</td><td>${fmt(r.lastExec)}</td><td>${r.service}</td><td>${r.timeTaken}</td>`; schBody.appendChild(tr); });
+        const ext = document.getElementById('extApiBody');
+      ext.innerHTML = '';
+      
+      (sampleExtApis[id] || []).forEach((a, i) => {
+      const tr = document.createElement('tr');
+      
+      // Determine status + remarks
+      let status = '<span class="badge bg-success">Healthy</span>';
+      let remarks = a.remarks || '-';
+      
+      if (a.res === 'Timeout') {
+      status = '<span class="badge bg-danger">Unhealthy</span>';
+      remarks = 'Connection Timeout';
+      } else if (a.res === '503') {
+      status = '<span class="badge bg-danger">Unhealthy</span>';
+      remarks = 'HTTP 503 Service Unavailable';
+      } else if (!isNaN(a.res) && Number(a.res) > 2000) {
+      status = '<span class="badge bg-warning text-dark">Slow</span>';
+      remarks = 'Response > 2s';
+      }
+      
+      tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${a.name}</td>
+      <td class="mono small">${a.url}</td>
+      <td>${a.res}</td>
+      <td>${fmt(a.lastGood)}</td>
+      <td>${fmt(a.lastCheck)}</td>
+      <td>${a.service}</td>
+      <td>${status}</td>
+      <td>${remarks}</td>
+      `;
+      
+      ext.appendChild(tr);
+      });
+        
+        const tabsList = document.getElementById('internalApiTabsList');
+      const tabsContent = document.getElementById('internalApiTabsContent');
+      
+      // Reset content
+      tabsList.innerHTML = '';
+      tabsContent.innerHTML = '';
+      tabsContent.className = 'tab-content'; // ✅ make sure container has tab-content
+      
+      const intApis = sampleInternalApis[id] || {};
+      let first = true;
+      
+      Object.keys(intApis).forEach((tabName, idx) => {
+      const lid = 'inttab-' + idx;
+      
+      // Tab button
+      const li = document.createElement('li');
+      li.className = 'nav-item';
+      li.innerHTML = `
+      <button class="nav-link ${first ? 'active' : ''}" 
+              data-bs-toggle="tab" 
+              data-bs-target="#${lid}" 
+              type="button" role="tab">
+        ${tabName}
+      </button>`;
+      tabsList.appendChild(li);
+      
+      // Tab content
+      const pane = document.createElement('div');
+      pane.className = `tab-pane fade ${first ? 'show active' : ''}`;
+      pane.id = lid;
+      pane.setAttribute('role', 'tabpanel');
+      
+      pane.innerHTML = `
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead>
+            <tr>
+              <th>API Name</th>
+              <th>URL</th>
+              <th>Resp (ms)</th>
+              <th>Services</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(intApis[tabName] || []).map(a => `
+              <tr>
+                <td>${a.name}</td>
+                <td class="mono small">${a.url}</td>
+                <td>${a.res}</td>
+                <td>${a.svc}</td>
+                <td>${a.remarks}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      `;
+      
+      tabsContent.appendChild(pane);
+      first = false;
+      });
+      
+      
+      
+        // GIS
+        const gis = document.getElementById('gisBody'); gis.innerHTML=''; (sampleGis[id]||[]).forEach(g=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${g.layer}</td><td class="mono small">${g.wms}</td><td>${g.type}</td><td><span class="status-chip ${g.status==='active'?'status-success':''}">${g.status}</span></td><td><button class="btn btn-sm btn-outline-secondary" onclick="alert('Preview not implemented')"><i class="bi bi-eye"></i></button></td>`; gis.appendChild(tr); });
+      
+      }
+      
+      function backToDashboard(){ document.getElementById('projectView').style.display='none'; document.getElementById('dashboardView').style.display='block'; window.currentProjectId=null; }
+      
+      // ---------- Init ----------
+      function init(){ renderProjectsTable(); renderRecent(); }
+      window.addEventListener('DOMContentLoaded', init);
+    </script>
+    <script>
+      function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('active');
+      document.querySelector('.sidebar-overlay').classList.toggle('show');
+      }
+      
+      document.addEventListener('DOMContentLoaded', () => {
+      const overlay = document.createElement('div');
+      overlay.className = 'sidebar-overlay';
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', toggleSidebar);
+      });
+      
+    </script>
+  </body>
+</html>

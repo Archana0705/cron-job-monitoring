@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Monitoring Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root{
+      --card-radius: 14px;
+      --accent: #6f42c1;
+      --muted: #6c757d;
+    }
+    #recentChanges li {
+      margin-bottom: 5px;
+    }
+    body{background:#f5f7fb;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+    .card-soft{border-radius:var(--card-radius); box-shadow: 0 6px 18px rgba(18,24,40,0.06);}
+    .status-chip{padding:4px 8px;border-radius:999px;font-weight:600;font-size:0.8rem}
+    .status-success{background:rgba(34,197,94,0.12);color:#16a34a}
+    .status-fail{background:rgba(239,68,68,0.12);color:#dc2626}
+    .status-warn{background:rgba(250,204,21,0.12);color:#ca8a04}
+    .table-fixed tbody tr td{vertical-align:middle}
+    .sidebar{min-width:240px;background:linear-gradient(180deg,#ffffff,#f8f9ff);border-right:1px solid #eef2ff}
+    .nav-pill .nav-link{border-radius:8px}
+    .muted-small{font-size:0.85rem;color:var(--muted)}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace}
+    .small-card{padding:0.8rem}
+    .kbd-like{background:#eef2ff;padding:6px 8px;border-radius:6px;font-weight:600}
+    .collapse-row{background:#fbfbff}
+  </style>
+</head>
+<body>
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <aside class="sidebar p-3 vh-100">
+      <div class="d-flex align-items-center gap-2 mb-4">
+        <div class="rounded-3 bg-white p-2 shadow-sm"><i class="bi bi-grid-fill fs-4 text-primary"></i></div>
+        <div>
+          <h6 class="mb-0">Monitoring Console</h6>
+          <small class="muted-small">Projects & Services</small>
+        </div>
+      </div>
+      <nav class="nav flex-column">
+        <a class="nav-link active" href="#dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+        <!-- <a class="nav-link" href="#projects"><i class="bi bi-kanban me-2"></i> Projects</a>
+        <a class="nav-link" href="#gis"><i class="bi bi-map me-2"></i> GIS Layers</a> -->
+        <hr>
+        <small class="text-uppercase text-muted">Quick filters</small>
+        <div class="mt-2">
+          <button class="btn btn-sm btn-outline-primary w-100 mb-2" onclick="applyQuickFilter('failed')">Failed Jobs</button>
+          <button class="btn btn-sm btn-outline-secondary w-100" onclick="applyQuickFilter('staging')">Staging</button>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-grow-1 p-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="mb-0">Projects Dashboard</h3>
+          <small class="text-muted">Overview of projects, scripts, schedulers and APIs</small>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <div class="kbd-like">ENV: <span id="currentEnv" class="ms-2 mono">All</span></div>
+          <button class="btn btn-primary" onclick="refreshAll()"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
+        </div>
+      </div>
+
+      <!-- Dashboard Cards -->
+      <div id="dashboardView">
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <div class="card card-soft small-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted">Total Projects</small>
+                  <h4 id="cardProjects">0</h4>
+                </div>
+                <i class="bi bi-folder fs-2 text-secondary"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-soft small-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted">Total Scripts</small>
+                  <h4 id="cardScripts">0</h4>
+                </div>
+                <i class="bi bi-file-code fs-2 text-secondary"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-soft small-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted">Failed Jobs Today</small>
+                  <h4 id="cardFailed">0</h4>
+                </div>
+                <i class="bi bi-exclamation-octagon fs-2 text-danger"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-soft small-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted">APIs Unhealthy</small>
+                  <h4 id="cardApiFail">0</h4>
+                </div>
+                <i class="bi bi-plug fs-2 text-warning"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Projects table -->
+        <div class="card card-soft p-3 mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Projects</h5>
+            <div class="d-flex gap-2">
+              <input id="searchProject" class="form-control form-control-sm" placeholder="Search project..." oninput="renderProjectsTable()" />
+              <select id="filterEnv" class="form-select form-select-sm" onchange="applyFilters()">
+                <option value="all">All Envs</option>
+                <option value="staging">Staging</option>
+                <option value="prod">Prod</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover table-fixed mb-0">
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Env</th>
+                  <th>Status</th>
+                  <th>Last Updated</th>
+                  <th>Scripts</th>
+                  <th>APIs</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="projectsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent activity / quick lists -->
+        <div class="row g-3">
+          <div class="col-md-6 d-flex">
+            <div class="card card-soft p-3 w-100">
+              <h6>Recent Script Changes</h6>
+              <ul id="recentChanges" class="list-unstyled mb-0"></ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card card-soft p-3">
+              <h6>Quick Status</h6>
+              <div id="quickStatusList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project Details View (hidden by default) -->
+      <div id="projectView" style="display:none">
+        <div class="card card-soft p-3 mb-3">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h4 id="projTitle">Project</h4>
+              <small id="projUrls" class="muted-small"></small>
+            </div>
+            <div>
+              <button class="btn btn-outline-secondary" onclick="backToDashboard()"><i class="bi bi-arrow-left"></i> Back</button>
+              <span class="ms-2 muted-small">Last pull: <span id="projLastPull">-</span></span>
+            </div>
+          </div>
+        </div>
+
+        <ul class="nav nav-pills mb-3" id="projTabs" role="tablist">
+          <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#scriptsTab">Scripts</button></li>
+          <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#schedulerTab">Scheduler</button></li>
+          <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#extApiTab">External APIs</button></li>
+          <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#intApiTab">Internal APIs</button></li>
+          <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#gisTab">GIS Layers</button></li>
+        </ul>
+
+        <div class="tab-content">
+          <!-- Scripts Tab -->
+          <div class="tab-pane fade show active" id="scriptsTab">
+            <div class="card card-soft p-3 mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Scripts</h6>
+                <div class="muted-small">Total: <span id="scriptsCount">0</span></div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Script Name</th>
+                      <th>Trigger</th>
+                      <th>Cron</th>
+                      <th>Start Time</th>
+                      <th>End Time</th>
+                      <th>Last Updated</th>
+                      <th>Functions</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="scriptsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scheduler Tab -->
+          <div class="tab-pane fade" id="schedulerTab">
+            <div class="card card-soft p-3">
+              <h6>Scheduler & Cron Jobs</h6>
+              <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                  <thead>
+                    <tr>
+                      <th>S.No</th>
+                      <th>Activity Name</th>
+                      <th>Trigger Info</th>
+                      <th>Last Executed Time</th>
+                      <th>Service</th>
+                      <th>Time Taken (ms)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="schedulerBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- External APIs -->
+          <div class="tab-pane fade" id="extApiTab">
+            <div class="card card-soft p-3">
+              <h6>External APIs</h6>
+              <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                  <thead>
+                    <tr>
+                      <th>S.No</th>
+                      <th>API Name</th>
+                      <th>URL</th>
+                      <th>Response Time (ms)</th>
+                      <th>Last Successfully Verified</th>
+                      <th>Last Verified</th>
+                      <th>Services</th>
+                      <th>Status</th>
+                      <th>Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody id="extApiBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Internal APIs -->
+          <div class="tab-pane fade" id="intApiTab">
+            <div class="card card-soft p-3">
+              <h6>Internal APIs</h6>
+              <ul class="nav nav-tabs mb-3" id="internalApiTabsList"></ul>
+              <div id="internalApiTabsContent"></div>
+            </div>
+          </div>
+
+          <!-- GIS -->
+          <div class="tab-pane fade" id="gisTab">
+            <div class="card card-soft p-3">
+              <h6>GIS Layers</h6>
+              <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                  <thead>
+                    <tr><th>Layer Name</th><th>WMS URL</th><th>Type</th><th>Status</th><th>Actions</th></tr>
+                  </thead>
+                  <tbody id="gisBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // ---------- Sample Data ----------
+    const sampleProjects = [
+      {id:1,name:'AgriConnect',env:'staging',status:'active',lastUpdated:'2025-09-29T10:23:12',scripts:6,apis:8,urls:{staging:'https://staging.agri.local',prod:'https://agri.example.com',wms:'https://wms.agri.example.com'}},
+      {id:2,name:'MarketWatch',env:'prod',status:'failed',lastUpdated:'2025-09-30T04:12:01',scripts:12,apis:15,urls:{staging:'',prod:'https://market.example.com',wms:'https://wms.market.example.com'}},
+      {id:3,name:'SoilSense',env:'staging',status:'active',lastUpdated:'2025-09-28T16:12:45',scripts:4,apis:3,urls:{staging:'https://soil.stg',prod:'',wms:''}},
+    ];
+
+    const sampleScripts = {
+      1: [
+        {name:'ingest_crops.sql',trigger:'manual',cron:'0 2 * * *',start:'02:00',end:'02:03',lastUpdated:'2025-09-29T02:03:00',functions:['fn_ingest','sp_notify'],status:'success'},
+        {name:'calculate_rates.py',trigger:'cron',cron:'0 */6 * * *',start:'06:00',end:'06:00',lastUpdated:'2025-09-30T06:00:03',functions:['calcRates'],status:'failed'},
+        {name:'push_to_queue.sh',trigger:'api',cron:'-',start:'11:00',end:'11:00',lastUpdated:'2025-09-27T11:00:00',functions:[],status:'success'}
+      ],
+      2: [
+        {name:'sync_prices.py',trigger:'cron',cron:'*/15 * * * *',start:'00:00',end:'00:00',lastUpdated:'2025-09-30T04:00:00',functions:['syncPrices'],status:'failed'}
+      ],
+      3: [
+        {name:'collect_soil.py',trigger:'cron',cron:'0 1 * * *',start:'01:00',end:'01:01',lastUpdated:'2025-09-28T01:02:03',functions:['collectSoil'],status:'success'}
+      ]
+    };
+
+    const sampleScheduler = {
+      1:[{act:'Crop ingest',trigger:'cron',lastExec:'2025-09-29T02:03:00',service:'ingest',timeTaken:180000},{act:'Rate calc',trigger:'cron',lastExec:'2025-09-30T06:00:03',service:'calc',timeTaken:230000}],
+      2:[{act:'Price sync',trigger:'cron',lastExec:'2025-09-30T04:00:00',service:'sync',timeTaken:120000}],
+      3:[{act:'Soil collect',trigger:'cron',lastExec:'2025-09-28T01:02:03',service:'collect',timeTaken:45000}]
+    };
+
+    const sampleExtApis = {
+      1:[{name:'WeatherAPI',url:'https://api.weather/v1',res:340,lastGood:'2025-09-29T08:00:00',lastCheck:'2025-09-30T08:00:00',service:'weather','remarks':'ok'},{name:'MarketRates',url:'https://api.rates/v2',res:1200,lastGood:'2025-09-25T05:00:00',lastCheck:'2025-09-30T05:00:00',service:'rates','remarks':'slow'}],
+      2:[{name:'PayGateway',url:'https://payments.example',res:85,lastGood:'2025-09-30T03:59:00',lastCheck:'2025-09-30T04:00:00',service:'payments','remarks':'ok'}],
+      3:[]
+    };
+
+    const sampleInternalApis = {
+      1:{'Tab1':[{name:'intGetCrops',url:'/api/crops',res:45,svc:'ingest',remarks:'ok'},{name:'intListFarmers',url:'/api/farmers',res:60,svc:'db',remarks:'ok'}],'Tab2':[], 'Tab3':[]},
+      2:{'Tab1':[{name:'intPrices',url:'/api/prices',res:210,svc:'sync',remarks:'slow'}],'Tab2':[], 'Tab3':[]},
+      3:{'Tab1':[], 'Tab2':[], 'Tab3':[]}
+    };
+
+    const sampleGis = {
+      1:[{layer:'SoilMap',wms:'https://wms.agri/soil',type:'Raster',status:'active'},{layer:'ParcelBoundaries',wms:'https://wms.agri/parcel',type:'Vector',status:'active'}],
+      2:[{layer:'MarketZones',wms:'https://wms.market/zones',type:'Vector',status:'active'}],
+      3:[]
+    };
+
+    // ---------- Utilities ----------
+    function fmt(dt){ if(!dt) return '-'; const d=new Date(dt); return d.toLocaleString(); }
+    function statusClass(s){ return s==='success'?'status-success':s==='failed'?'status-fail':'status-warn' }
+
+    // ---------- Render Dashboard ----------
+    function renderProjectsTable(){
+      const tbody = document.getElementById('projectsTableBody'); tbody.innerHTML='';
+      const q = document.getElementById('searchProject').value.toLowerCase();
+      const envFilter = document.getElementById('filterEnv').value;
+      const filtered = sampleProjects.filter(p=> (envFilter==='all'||p.env===envFilter) && p.name.toLowerCase().includes(q));
+      filtered.forEach(p=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${p.name}<div class="muted-small">ID: ${p.id}</div></td>
+          <td>${p.env}</td>
+          <td><span class="status-chip ${p.status==='active'?'status-success':'status-fail'}">${p.status}</span></td>
+          <td>${fmt(p.lastUpdated)}</td>
+          <td>${p.scripts}</td>
+          <td>${p.apis}</td>
+          <td><button class="btn btn-sm btn-outline-primary" onclick="openProject(${p.id})"><i class="bi bi-box-arrow-up-right"></i> View</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('cardProjects').innerText = sampleProjects.length;
+      document.getElementById('cardScripts').innerText = sampleProjects.reduce((s,p)=>s+p.scripts,0);
+      const failedJobs = Object.values(sampleScripts).flat().filter(s=>s.status==='failed').length;
+      document.getElementById('cardFailed').innerText = failedJobs;
+      const apiFails = Object.values(sampleExtApis).flat().filter(a=>a.remarks==='slow').length;
+      document.getElementById('cardApiFail').innerText = apiFails;
+
+    }
+
+    function applyFilters(){
+      const env = document.getElementById('filterEnv').value;
+      document.getElementById('currentEnv').innerText = env==='all'? 'All' : env.charAt(0).toUpperCase()+env.slice(1);
+      renderProjectsTable();
+    }
+
+    function applyQuickFilter(key){
+      if(key==='failed'){ document.getElementById('filterEnv').value='all'; document.getElementById('searchProject').value=''; renderProjectsTable();
+        // highlight projects with failed status
+        const rows = document.querySelectorAll('#projectsTableBody tr'); rows.forEach(r=>{ if(r.innerText.toLowerCase().includes('failed')) r.classList.add('table-danger'); })
+      }
+      if(key==='staging'){ document.getElementById('filterEnv').value='staging'; applyFilters(); }
+    }
+
+    function refreshAll(){
+      // in real app -> fetch backend status. Here we just re-render
+      renderProjectsTable(); renderRecent();
+      if(window.currentProjectId) openProject(window.currentProjectId);
+    }
+
+    // Recent Changes & Quick Status
+    function renderRecent(){
+      const list = document.getElementById('recentChanges'); list.innerHTML='';
+      const items = Object.values(sampleScripts).flat().slice(0,6);
+      items.forEach(it=>{ const li=document.createElement('li'); li.innerHTML=`<strong>${it.name}</strong> — ${fmt(it.lastUpdated)} <span class="ms-2 badge bg-secondary">${it.status}</span>`; list.appendChild(li); });
+
+      const ql = document.getElementById('quickStatusList'); ql.innerHTML='';
+      sampleProjects.forEach(p=>{ const div=document.createElement('div'); div.className='d-flex justify-content-between align-items-center py-2 border-bottom'; div.innerHTML=`<div><strong>${p.name}</strong><div class="muted-small">${p.env} • ${p.scripts} scripts</div></div><div><span class="status-chip ${p.status==='active'?'status-success':'status-fail'}">${p.status}</span></div>`; ql.appendChild(div); });
+    }
+
+    // ---------- Project View ----------
+    function openProject(id){
+      window.currentProjectId = id;
+      const proj = sampleProjects.find(p=>p.id===id);
+      document.getElementById('dashboardView').style.display='none';
+      document.getElementById('projectView').style.display='block';
+      document.getElementById('projTitle').innerText = proj.name + ' • ' + proj.env.toUpperCase();
+      document.getElementById('projUrls').innerHTML = `Staging: ${proj.urls.staging || '-'} &nbsp; | &nbsp; Prod: ${proj.urls.prod || '-'} &nbsp; | &nbsp; WMS: ${proj.urls.wms || '-'}`;
+      document.getElementById('projLastPull').innerText = fmt(proj.lastUpdated);
+
+      // Scripts
+      const sbody = document.getElementById('scriptsTableBody'); sbody.innerHTML='';
+      const scripts = sampleScripts[id] || [];
+      document.getElementById('scriptsCount').innerText = scripts.length;
+      scripts.forEach(s=>{
+        const tr = document.createElement('tr');
+        const funcs = s.functions.length? s.functions.join(', ') : '-';
+        tr.innerHTML = `
+          <td>${s.name}</td>
+          <td>${s.trigger}</td>
+          <td><code class="mono">${s.cron}</code></td>
+          <td>${s.start}</td>
+          <td>${s.end}</td>
+          <td>${fmt(s.lastUpdated)}</td>
+          <td>${funcs}</td>
+          <td><span class="status-chip ${statusClass(s.status)}">${s.status}</span></td>
+        `;
+        sbody.appendChild(tr);
+      });
+
+      // Scheduler
+      const schBody = document.getElementById('schedulerBody'); schBody.innerHTML='';
+      (sampleScheduler[id]||[]).forEach((r,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${r.act}</td><td>${r.trigger}</td><td>${fmt(r.lastExec)}</td><td>${r.service}</td><td>${r.timeTaken}</td>`; schBody.appendChild(tr); });
+
+      // External APIs
+      // const ext = document.getElementById('extApiBody'); ext.innerHTML=''; (sampleExtApis[id]||[]).forEach((a,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${a.name}</td><td class="mono small">${a.url}</td><td>${a.res}</td><td>${fmt(a.lastGood)}</td><td>${fmt(a.lastCheck)}</td><td>${a.service}</td><td>${a.remarks}</td>`; ext.appendChild(tr); });
+      const ext = document.getElementById('extApiBody');
+ext.innerHTML = '';
+
+(sampleExtApis[id] || []).forEach((a, i) => {
+  const tr = document.createElement('tr');
+
+  // Determine status + remarks
+  let status = '<span class="badge bg-success">Healthy</span>';
+  let remarks = a.remarks || '-';
+
+  if (a.res === 'Timeout') {
+    status = '<span class="badge bg-danger">Unhealthy</span>';
+    remarks = 'Connection Timeout';
+  } else if (a.res === '503') {
+    status = '<span class="badge bg-danger">Unhealthy</span>';
+    remarks = 'HTTP 503 Service Unavailable';
+  } else if (!isNaN(a.res) && Number(a.res) > 2000) {
+    status = '<span class="badge bg-warning text-dark">Slow</span>';
+    remarks = 'Response > 2s';
+  }
+
+  tr.innerHTML = `
+    <td>${i + 1}</td>
+    <td>${a.name}</td>
+    <td class="mono small">${a.url}</td>
+    <td>${a.res}</td>
+    <td>${fmt(a.lastGood)}</td>
+    <td>${fmt(a.lastCheck)}</td>
+    <td>${a.service}</td>
+    <td>${status}</td>
+    <td>${remarks}</td>
+  `;
+
+  ext.appendChild(tr);
+});
+
+
+      // Internal APIs - tabs
+      // const tabsList = document.getElementById('internalApiTabsList'); const tabsContent=document.getElementById('internalApiTabsContent'); tabsList.innerHTML=''; tabsContent.innerHTML='';
+      // const intApis = sampleInternalApis[id] || {};
+      // let first=true; Object.keys(intApis).forEach((tabName, idx)=>{
+      //   const lid = 'inttab-'+idx;
+      //   const li = document.createElement('li'); li.className='nav-item'; li.innerHTML=`<button class="nav-link ${first? 'active':''}" data-bs-toggle="tab" data-bs-target="#${lid}">${tabName}</button>`; tabsList.appendChild(li);
+      //   const pane = document.createElement('div'); pane.className=`tab-pane ${first? 'active':''}`; pane.id=lid; pane.innerHTML = `<div class="table-responsive"><table class="table table-sm mb-0"><thead><tr><th>API Name</th><th>URL</th><th>Resp (ms)</th><th>Services</th><th>Remarks</th></tr></thead><tbody>${(intApis[tabName]||[]).map(a=>`<tr><td>${a.name}</td><td class="mono small">${a.url}</td><td>${a.res}</td><td>${a.svc}</td><td>${a.remarks}</td></tr>`).join('')}</tbody></table></div>`;
+      //   tabsContent.appendChild(pane);
+      //   first=false;
+      // });
+      
+      const tabsList = document.getElementById('internalApiTabsList');
+const tabsContent = document.getElementById('internalApiTabsContent');
+
+// Reset content
+tabsList.innerHTML = '';
+tabsContent.innerHTML = '';
+tabsContent.className = 'tab-content'; // ✅ make sure container has tab-content
+
+const intApis = sampleInternalApis[id] || {};
+let first = true;
+
+Object.keys(intApis).forEach((tabName, idx) => {
+  const lid = 'inttab-' + idx;
+
+  // Tab button
+  const li = document.createElement('li');
+  li.className = 'nav-item';
+  li.innerHTML = `
+    <button class="nav-link ${first ? 'active' : ''}" 
+            data-bs-toggle="tab" 
+            data-bs-target="#${lid}" 
+            type="button" role="tab">
+      ${tabName}
+    </button>`;
+  tabsList.appendChild(li);
+
+  // Tab content
+  const pane = document.createElement('div');
+  pane.className = `tab-pane fade ${first ? 'show active' : ''}`;
+  pane.id = lid;
+  pane.setAttribute('role', 'tabpanel');
+
+  pane.innerHTML = `
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead>
+          <tr>
+            <th>API Name</th>
+            <th>URL</th>
+            <th>Resp (ms)</th>
+            <th>Services</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(intApis[tabName] || []).map(a => `
+            <tr>
+              <td>${a.name}</td>
+              <td class="mono small">${a.url}</td>
+              <td>${a.res}</td>
+              <td>${a.svc}</td>
+              <td>${a.remarks}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  tabsContent.appendChild(pane);
+  first = false;
+});
+
+
+
+      // GIS
+      const gis = document.getElementById('gisBody'); gis.innerHTML=''; (sampleGis[id]||[]).forEach(g=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${g.layer}</td><td class="mono small">${g.wms}</td><td>${g.type}</td><td><span class="status-chip ${g.status==='active'?'status-success':''}">${g.status}</span></td><td><button class="btn btn-sm btn-outline-secondary" onclick="alert('Preview not implemented')"><i class="bi bi-eye"></i></button></td>`; gis.appendChild(tr); });
+
+    }
+
+    function backToDashboard(){ document.getElementById('projectView').style.display='none'; document.getElementById('dashboardView').style.display='block'; window.currentProjectId=null; }
+
+    // ---------- Init ----------
+    function init(){ renderProjectsTable(); renderRecent(); }
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
