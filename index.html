@@ -5,20 +5,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cron Job Monitoring Dashboard</title>
-  <link href="assets/css/bootstrap.min.css" rel="stylesheet">
-  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"> -->
-  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/vendor/datatable/dataTables.bootstrap5.min.css" rel="stylesheet">
-  <!-- <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet"> -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #4361ee;
       --primary-dark: #3a56d4;
       --secondary: #7209b7;
-      --success: #4cc9f0;
-      --danger: #f72585;
-      --warning: #ff9e00;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
       --dark: #121826;
       --light: #f8f9fa;
       --card-bg: #ffffff;
@@ -69,7 +68,6 @@
 
     .main-content {
       padding: 1.2rem;
-      max-width: 1400px;
       margin: 0 auto;
     }
 
@@ -84,6 +82,7 @@
       margin-bottom: 0.3rem;
     }
 
+    /* Status Badge Colors */
     .status-badge {
       padding: 0.2rem 0.5rem;
       border-radius: 12px;
@@ -91,27 +90,37 @@
       font-weight: 600;
       display: inline-flex;
       align-items: center;
-      gap: 2px;
+      gap: 4px;
     }
 
     .status-success {
-      background: rgba(76, 201, 240, 0.15);
-      color: #08b24f;
+      background: rgba(16, 185, 129, 0.15);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
-    .status-warning {
-      background: rgba(255, 158, 0, 0.15);
+    .status-started {
+      background: rgba(59, 130, 246, 0.15);
+      color: #2563eb;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .status-pending {
+      background: rgba(245, 158, 11, 0.15);
       color: #d97706;
+      border: 1px solid rgba(245, 158, 11, 0.3);
     }
 
     .status-critical {
-      background: rgba(247, 37, 133, 0.15);
-      color: #be185d;
+      background: rgba(239, 68, 68, 0.15);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
     .status-inactive {
       background: rgba(100, 116, 139, 0.15);
       color: #64748b;
+      border: 1px solid rgba(100, 116, 139, 0.3);
     }
 
     .data-table {
@@ -120,6 +129,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
       overflow: hidden;
       border: none;
+      padding: 1rem;
     }
 
     .data-table thead th {
@@ -247,59 +257,6 @@
       border: 1px solid rgba(67, 97, 238, 0.1);
     }
 
-    .log-entry {
-      padding: 0.5rem;
-      border-radius: 5px;
-      background: white;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      margin-bottom: 0.3rem;
-      font-size: 0.75rem;
-    }
-
-    .log-entry.error {
-      border-left: 2px solid var(--danger);
-      background: rgba(247, 37, 133, 0.05);
-    }
-
-    .log-entry.warning {
-      border-left: 2px solid var(--warning);
-      background: rgba(255, 158, 0, 0.05);
-    }
-
-    .log-entry.success {
-      border-left: 2px solid var(--success);
-      background: rgba(76, 201, 240, 0.05);
-    }
-
-    .search-bar {
-      position: relative;
-      max-width: 300px;
-    }
-
-    .search-bar input {
-      border-radius: 8px;
-      padding-left: 2rem;
-      border: 2px solid rgba(67, 97, 238, 0.1);
-      background: rgba(255, 255, 255, 0.8);
-      transition: all 0.3s ease;
-      font-size: 0.8rem;
-      height: 32px;
-    }
-
-    .search-bar input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
-    }
-
-    .search-bar i {
-      position: absolute;
-      left: 0.6rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #64748b;
-      font-size: 0.8rem;
-    }
-
     .btn-sm {
       padding: 0.2rem 0.5rem;
       font-size: 0.75rem;
@@ -334,11 +291,37 @@
     .dataTables_wrapper .dataTables_length select {
       font-size: 0.8rem;
       height: 32px;
+      padding: 0.25rem 0.5rem;
     }
 
     .dataTables_wrapper .dataTables_filter input {
       font-size: 0.8rem;
       height: 32px;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid rgba(67, 97, 238, 0.2);
+    }
+
+    .dataTables_wrapper .dataTables_filter input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+      margin-top: 1rem;
+      padding-top: 0.5rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+      border-radius: 6px;
+    }
+
+    .dataTables_wrapper .dataTables_info {
+      font-size: 0.75rem;
+      color: #64748b;
+      padding-top: 0.7rem;
     }
 
     .duration-badge {
@@ -371,6 +354,42 @@
       border: 1px solid var(--danger);
     }
 
+    .next-run {
+      font-size: 0.65rem;
+      color: #64748b;
+    }
+
+    .nav-tabs-custom {
+      border-bottom: 2px solid rgba(67, 97, 238, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .nav-tabs-custom .nav-link {
+      color: var(--dark);
+      font-weight: 500;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      background: transparent;
+      font-size: 0.85rem;
+    }
+
+    .nav-tabs-custom .nav-link:hover {
+      border: none;
+      color: var(--primary);
+    }
+
+    .nav-tabs-custom .nav-link.active {
+      border: none;
+      color: var(--primary);
+      background: transparent;
+      border-bottom: 2px solid var(--primary);
+      font-weight: 600;
+    }
+
+    .tab-pane {
+      transition: opacity 0.2s ease;
+    }
+
     @media (max-width:768px) {
       .main-content {
         padding: 0.8rem;
@@ -383,6 +402,70 @@
       .filter-group {
         width: 100%;
       }
+    }
+
+    /* Error Modal Styles */
+    #errorDetailModal .modal-content {
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    #errorDetailModal .modal-header {
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+    }
+
+    #errorDetailModal pre {
+      scrollbar-width: thin;
+      scrollbar-color: #64748b #1e293b;
+    }
+
+    #errorDetailModal pre::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    #errorDetailModal pre::-webkit-scrollbar-track {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+
+    #errorDetailModal pre::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+
+    #errorDetailModal pre::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+
+    /* Animation for modal */
+    .modal.fade .modal-dialog {
+      transform: scale(0.95);
+      transition: transform 0.2s ease-out;
+    }
+
+    .modal.show .modal-dialog {
+      transform: scale(1);
+    }
+
+    /* Error preview button styles */
+    .btn-outline-danger {
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      background: white;
+      transition: all 0.15s;
+    }
+
+    .btn-outline-danger:hover {
+      background: #b91c1c;
+      color: white;
+      border-color: #b91c1c;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(185, 28, 28, 0.2);
+    }
+
+    .btn-outline-danger:active {
+      transform: translateY(0);
     }
   </style>
 </head>
@@ -416,82 +499,158 @@
   </nav>
 
   <div class="main-content">
-
-    <div class="section-header position-absolute top-0 end-0 p-3">
-      <button class="btn btn-primary btn-sm" onclick="fetchCronJobs()">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="section-title mb-0">Cron Job Monitoring</h5>
+      <button class="btn btn-primary btn-sm" onclick="refreshAllData()">
         <i class="bi bi-arrow-clockwise me-1"></i> Refresh
       </button>
     </div>
+
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs nav-tabs-custom" id="cronTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="current-tab" data-bs-toggle="tab" data-bs-target="#current" type="button"
+          role="tab" aria-controls="current" aria-selected="true">
+          <i class="bi bi-activity me-1"></i> Current Status
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button"
+          role="tab" aria-controls="history" aria-selected="false">
+          <i class="bi bi-clock-history me-1"></i> Execution History
+        </button>
+      </li>
+    </ul>
 
     <div id="loadingSpinner" class="loading-spinner">
       <div class="spinner"></div>
       <p>Fetching cron job data...</p>
     </div>
 
-    <div class="filter-card">
-      <div class="filter-row">
-        <div class="filter-group">
-          <label>Application</label>
-          <select class="form-control form-control-sm" id="filterApplication">
-            <option value="">All Applications</option>
-            <option value="Database">Database</option>
-            <option value="Backup">Backup</option>
-            <option value="ETL">ETL</option>
-            <option value="Report">Report</option>
-            <option value="Maintenance">Maintenance</option>
-          </select>
+    <!-- Tab Content -->
+    <div class="tab-content" id="cronTabContent">
+      <!-- Current Status Tab -->
+      <div class="tab-pane fade show active" id="current" role="tabpanel" aria-labelledby="current-tab">
+        <div class="filter-card">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label>Application</label>
+              <select class="form-control form-control-sm" id="currentFilterApplication">
+                <option value="ALL" selected>All Applications</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Status</label>
+              <select class="form-control form-control-sm" id="currentFilterStatus">
+                <option value="ALL">All Status</option>
+                <option value="SUCCESS">Success</option>
+                <option value="FAILED">Failed</option>
+                <option value="STARTED">Started</option>
+                <option value="PENDING">Pending</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Search Job</label>
+              <input type="text" class="form-control form-control-sm" id="currentFilterSearch"
+                placeholder="Job name...">
+            </div>
+            <div class="filter-group">
+              <button class="btn btn-primary btn-sm w-100" onclick="filterCurrentJobs()">
+                <i class="bi bi-funnel me-1"></i>Filter
+              </button>
+            </div>
+            <div class="filter-group">
+              <button class="btn btn-secondary btn-sm w-100" onclick="clearCurrentFilters()">
+                <i class="bi bi-x-circle me-1"></i>Clear
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="filter-group">
-          <label>Status</label>
-          <select class="form-control form-control-sm" id="filterStatus">
-            <option value="">All Status</option>
-            <option value="success">Success</option>
-            <option value="failed">Failed</option>
-            <option value="running">Running</option>
-            <option value="pending">Pending</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>From Date</label>
-          <input type="date" class="form-control form-control-sm" id="filterFromDate">
-        </div>
-        <div class="filter-group">
-          <label>To Date</label>
-          <input type="date" class="form-control form-control-sm" id="filterToDate">
-        </div>
-        <div class="filter-group">
-          <button class="btn btn-primary btn-sm w-100" onclick="applyFilters()">
-            <i class="bi bi-funnel me-1"></i>Filter
-          </button>
-        </div>
-        <div class="filter-group">
-          <button class="btn btn-secondary btn-sm w-100" onclick="clearFilters()">
-            <i class="bi bi-x-circle me-1"></i>Clear
-          </button>
+
+        <div class="data-table" id="currentJobsContainer">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0" id="currentJobsTable">
+              <thead>
+                <tr>
+                  <th>Job Name</th>
+                  <th>Application</th>
+                  <th>Schedule</th>
+                  <th>Current Status</th>
+                  <th>Log Status</th>
+                  <th>Last Run</th>
+                  <th>Next Run</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="currentJobsTableBody">
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="data-table">
-      <div class="table-responsive">
-        <table class="table table-hover mb-0" id="jobsTable">
-          <thead>
-            <tr>
-              <th>Job Name</th>
-              <th>Application</th>
-              <th>Server</th>
-              <th>Schedule</th>
-              <th>Last Run</th>
-              <th>Duration</th>
-              <th>Next Run</th>
-              <th>Status</th>
-              <th>Error Message</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="jobsTableBody">
-          </tbody>
-        </table>
+      <!-- History Tab -->
+      <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+        <div class="filter-card">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label>Application</label>
+              <select class="form-control form-control-sm" id="historyFilterApplication">
+                <option value="ALL" selected>All Applications</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Status</label>
+              <select class="form-control form-control-sm" id="historyFilterStatus">
+                <option value="ALL">All Status</option>
+                <option value="SUCCESS">Success</option>
+                <option value="FAILED">Failed</option>
+                <option value="STARTED">Started</option>
+                <option value="PENDING">Pending</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>From Date</label>
+              <input type="date" class="form-control form-control-sm" id="historyFilterFromDate">
+            </div>
+            <div class="filter-group">
+              <label>To Date</label>
+              <input type="date" class="form-control form-control-sm" id="historyFilterToDate">
+            </div>
+            <div class="filter-group">
+              <button class="btn btn-primary btn-sm w-100" onclick="filterHistoryJobs()">
+                <i class="bi bi-funnel me-1"></i>Filter
+              </button>
+            </div>
+            <div class="filter-group">
+              <button class="btn btn-secondary btn-sm w-100" onclick="clearHistoryFilters()">
+                <i class="bi bi-x-circle me-1"></i>Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-table" id="historyJobsContainer">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0" id="historyJobsTable">
+              <thead>
+                <tr>
+                  <th>Job Name</th>
+                  <th>Application</th>
+                  <th>Schedule</th>
+                  <th>Status</th>
+                  <th>Log Status</th>
+                  <th>Started At</th>
+                  <th>Ended At</th>
+                  <th>Duration</th>
+                  <th>Error</th>
+                </tr>
+              </thead>
+              <tbody id="historyJobsTableBody">
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -512,603 +671,1257 @@
     </div>
   </div>
 
-  <!-- Edit Job Modal -->
-  <div class="modal fade" id="editJobModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered detail-modal">
+  <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered detail-modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Edit Cron Job</h5>
+          <h5 class="modal-title" id="historyModalTitle">Job Execution History</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body">
-          <form id="editJobForm">
-            <input type="hidden" id="editJobId" name="jobId">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Job Name *</label>
-                  <input type="text" class="form-control" id="editJobName" name="jobName" required>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Description</label>
-                  <textarea class="form-control" id="editDescription" name="description" rows="2"></textarea>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Application *</label>
-                  <select class="form-control" id="editApplication" name="application" required>
-                    <option value="">Select Application</option>
-                    <option value="Database">Database</option>
-                    <option value="Backup">Backup</option>
-                    <option value="ETL">ETL</option>
-                    <option value="Report">Report</option>
-                    <option value="Maintenance">Maintenance</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Server Name *</label>
-                  <input type="text" class="form-control" id="editServerName" name="serverName" required>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Table Name</label>
-                  <input type="text" class="form-control" id="editTableName" name="tableName">
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Cron Expression *</label>
-                  <input type="text" class="form-control" id="editCronExpression" name="cronExpression"
-                    placeholder="0 2 * * *" required>
-                  <small class="text-muted">Format: minute hour day month weekday</small>
-                </div>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Command/Procedure *</label>
-              <textarea class="form-control" id="editCommand" name="command" rows="3" required></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Status</label>
-              <select class="form-control" id="editStatus" name="status">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
-          </form>
+        <div class="modal-body" id="historyModalBody">
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-danger btn-sm" onclick="deleteJob()">
-            <i class="bi bi-trash me-1"></i>Delete
-          </button>
-          <button type="button" class="btn btn-primary btn-sm" onclick="saveJobChanges()">Save Changes</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="modal fade" id="addJobModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered detail-modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Add New Cron Job</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <form id="addJobForm">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Job Name *</label>
-                  <input type="text" class="form-control" name="jobName" required>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Description</label>
-                  <textarea class="form-control" name="description" rows="2"></textarea>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Application *</label>
-                  <select class="form-control" name="application" required>
-                    <option value="">Select Application</option>
-                    <option value="Database">Database</option>
-                    <option value="Backup">Backup</option>
-                    <option value="ETL">ETL</option>
-                    <option value="Report">Report</option>
-                    <option value="Maintenance">Maintenance</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Server Name *</label>
-                  <input type="text" class="form-control" name="serverName" required>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Table Name</label>
-                  <input type="text" class="form-control" name="tableName">
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Cron Expression *</label>
-                  <input type="text" class="form-control" name="cronExpression" placeholder="0 2 * * *" required>
-                  <small class="text-muted">Format: minute hour day month weekday</small>
-                </div>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Command/Procedure *</label>
-              <textarea class="form-control" name="command" rows="3" required></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Status</label>
-              <select class="form-control" name="status">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary btn-sm" onclick="addNewJob()">Add Job</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="assets/vendor/jquery/jquery.min.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.js"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> -->
-  <script src="assets/vendor/jquery/jquery.dataTables.min.js"></script>
-  <script src="assets/vendor/datatable/dataTables.bootstrap5.min.js"></script>
-  <!-- <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> -->
-  <!-- <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script> -->
-
-
-
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <script src="assets/js/crypto-js.min.js"></script>
+  <script src="assets/js/global.js"></script>
+  <script src="assets/js/encrypt_decrypt.js"></script>
   <script>
-    // Mock database structure
-    const mockDB = {
-      cron_jobs_metadata: [
-        {
-          id: 1,
-          job_name: 'Daily Backup',
-          description: 'Database backup to S3',
-          application: 'Backup',
-          server_name: 'db-server-01',
-          table_name: 'backup_logs',
-          cron_expression: '0 2 * * *',
-          command: '/usr/bin/pg_dump | gzip > /backup/db-$(date +%Y%m%d).sql.gz',
-          created_at: '2024-01-01T00:00:00Z',
-          avg_duration: '2m 15s'
-        },
-        {
-          id: 2,
-          job_name: 'ETL Process',
-          description: 'Extract Transform Load for sales data',
-          application: 'ETL',
-          server_name: 'etl-server-01',
-          table_name: 'sales_fact',
-          cron_expression: '*/15 * * * *',
-          command: 'python /scripts/etl_sales.py',
-          created_at: '2024-01-02T00:00:00Z',
-          avg_duration: '45s'
-        },
-        {
-          id: 3,
-          job_name: 'Report Generation',
-          description: 'Generate daily sales report',
-          application: 'Report',
-          server_name: 'report-server-01',
-          table_name: 'daily_reports',
-          cron_expression: '30 6 * * *',
-          command: '/scripts/generate_report.sh',
-          created_at: '2024-01-03T00:00:00Z',
-          avg_duration: '1m 30s'
-        },
-        {
-          id: 4,
-          job_name: 'Cache Cleanup',
-          description: 'Clean expired cache entries',
-          application: 'Maintenance',
-          server_name: 'web-server-01',
-          table_name: 'cache_logs',
-          cron_expression: '0 */4 * * *',
-          command: 'php /var/www/bin/console cache:clear',
-          created_at: '2024-01-04T00:00:00Z',
-          avg_duration: '15s'
-        },
-        {
-          id: 5,
-          job_name: 'Data Sync',
-          description: 'Sync data between production and staging',
-          application: 'Database',
-          server_name: 'sync-server-01',
-          table_name: 'sync_logs',
-          cron_expression: '0 3 * * *',
-          command: '/scripts/sync_data.sh',
-          created_at: '2024-01-05T00:00:00Z',
-          avg_duration: '3m 45s'
-        },
-        {
-          id: 6,
-          job_name: 'Log Rotation',
-          description: 'Rotate and compress application logs',
-          application: 'Maintenance',
-          server_name: 'log-server-01',
-          table_name: 'log_rotation',
-          cron_expression: '0 0 * * *',
-          command: '/scripts/rotate_logs.sh',
-          created_at: '2024-01-06T00:00:00Z',
-          avg_duration: '5m 20s'
-        },
-        {
-          id: 7,
-          job_name: 'Email Notifications',
-          description: 'Send daily email reports',
-          application: 'Report',
-          server_name: 'mail-server-01',
-          table_name: 'email_logs',
-          cron_expression: '0 8 * * *',
-          command: 'python /scripts/send_emails.py',
-          created_at: '2024-01-07T00:00:00Z',
-          avg_duration: '2m 10s'
-        }
-      ],
-      cron_jobs_status: [
-        {
-          id: 1,
-          job_id: 1,
-          last_run: '2024-01-15T02:00:00Z',
-          next_run: '2024-01-16T02:00:00Z',
-          status: 'success',
-          duration: '2m 15s',
-          exit_code: 0,
-          output: 'Backup completed successfully',
-          updated_at: '2024-01-15T02:02:15Z',
-          error_message: ''
-        },
-        {
-          id: 2,
-          job_id: 2,
-          last_run: '2024-01-15T11:15:00Z',
-          next_run: '2024-01-15T11:30:00Z',
-          status: 'failed',
-          duration: '45s',
-          exit_code: 1,
-          output: 'Error: Database connection failed',
-          updated_at: '2024-01-15T11:15:45Z',
-          error_message: 'Database connection timeout after 30 seconds'
-        },
-        {
-          id: 3,
-          job_id: 3,
-          last_run: '2024-01-15T06:30:00Z',
-          next_run: '2024-01-16T06:30:00Z',
-          status: 'success',
-          duration: '1m 30s',
-          exit_code: 0,
-          output: 'Report generated successfully',
-          updated_at: '2024-01-15T06:31:30Z',
-          error_message: ''
-        },
-        {
-          id: 4,
-          job_id: 4,
-          last_run: '2024-01-15T08:00:00Z',
-          next_run: '2024-01-15T12:00:00Z',
-          status: 'running',
-          duration: '15s',
-          exit_code: null,
-          output: 'Running...',
-          updated_at: '2024-01-15T08:00:15Z',
-          error_message: ''
-        },
-        {
-          id: 5,
-          job_id: 5,
-          last_run: '2024-01-15T03:00:00Z',
-          next_run: '2024-01-16T03:00:00Z',
-          status: 'success',
-          duration: '3m 45s',
-          exit_code: 0,
-          output: 'Data sync completed',
-          updated_at: '2024-01-15T03:03:45Z',
-          error_message: ''
-        },
-        {
-          id: 6,
-          job_id: 6,
-          last_run: '2024-01-15T00:00:00Z',
-          next_run: '2024-01-16T00:00:00Z',
-          status: 'success',
-          duration: '5m 20s',
-          exit_code: 0,
-          output: 'Log rotation completed',
-          updated_at: '2024-01-15T00:05:20Z',
-          error_message: ''
-        },
-        {
-          id: 7,
-          job_id: 7,
-          last_run: '2024-01-15T08:00:00Z',
-          next_run: '2024-01-16T08:00:00Z',
-          status: 'pending',
-          duration: null,
-          exit_code: null,
-          output: 'Waiting for next run',
-          updated_at: '2024-01-15T08:00:00Z',
-          error_message: ''
-        }
-      ],
-      job_logs: [
-        { id: 1, job_id: 1, timestamp: '2024-01-15T02:00:00Z', message: 'Backup started', type: 'info' },
-        { id: 2, job_id: 1, timestamp: '2024-01-15T02:01:30Z', message: 'Database connection established', type: 'info' },
-        { id: 3, job_id: 1, timestamp: '2024-01-15T02:02:15Z', message: 'Backup completed successfully', type: 'success' },
-        { id: 4, job_id: 2, timestamp: '2024-01-15T11:15:00Z', message: 'ETL process started', type: 'info' },
-        { id: 5, job_id: 2, timestamp: '2024-01-15T11:15:30Z', message: 'Error connecting to database', type: 'error' },
-        { id: 6, job_id: 2, timestamp: '2024-01-15T11:15:45Z', message: 'ETL process failed', type: 'error' },
-        { id: 7, job_id: 1, timestamp: '2024-01-14T02:00:00Z', message: 'Previous backup started', type: 'info' },
-        { id: 8, job_id: 1, timestamp: '2024-01-14T02:02:10Z', message: 'Previous backup completed', type: 'success' },
-        { id: 9, job_id: 3, timestamp: '2024-01-15T06:30:00Z', message: 'Report generation started', type: 'info' },
-        { id: 10, job_id: 3, timestamp: '2024-01-15T06:31:30Z', message: 'Report generated successfully', type: 'success' },
-        { id: 11, job_id: 4, timestamp: '2024-01-15T08:00:00Z', message: 'Cache cleanup started', type: 'info' },
-        { id: 12, job_id: 4, timestamp: '2024-01-15T08:00:15Z', message: 'Cache cleanup in progress', type: 'info' },
-        { id: 13, job_id: 5, timestamp: '2024-01-15T03:00:00Z', message: 'Data sync started', type: 'info' },
-        { id: 14, job_id: 5, timestamp: '2024-01-15T03:03:45Z', message: 'Data sync completed', type: 'success' }
-      ]
+    const API_CONFIG = {
+      baseUrl: 'https://tngis.tnega.org/state_scholarship_portal_api/cron/api/v1/cron-job-monitoring/',
+      endpoints: {
+        get_execution_logs_paginated: 'get_execution_logs_paginated',
+        get_active_applications: 'get_active_applications',
+        get_job_current_status: 'get_job_current_status'
+      }
     };
 
-    let dataTable = null;
+    // DataTables instances
+    let currentDataTable = null;
+    let historyDataTable = null;
+
+    // Filter states
     let currentFilter = {
-      application: '',
-      status: '',
-      fromDate: '',
-      toDate: ''
+      app_id: null,
+      status: null,
+      search: ''
     };
-    let currentJobId = null;
 
-    function formatDate(dateString) {
-      if (!dateString) return 'Never';
-      const date = new Date(dateString);
+    let historyFilter = {
+      app_id: null,
+      status: null,
+      from_date: null,
+      to_date: null
+    };
+
+    // Data storage
+    let API_DATA = {
+      applications: []
+    };
+    let allJobsHistory = [];
+    let jobsCurrentStatus = [];
+
+    // ================== CRON PARSING FUNCTIONS ==================
+    function parseCronExpression(cronExpression) {
+      if (!cronExpression || cronExpression === 'N/A') {
+        return {
+          isValid: false,
+          nextRun: 'Unknown',
+          nextRunTimestamp: Date.now() + 86400000,
+          nextRunText: 'Unknown'
+        };
+      }
+
+      try {
+        const parts = cronExpression.trim().split(/\s+/);
+        if (parts.length < 5) {
+          return {
+            isValid: false,
+            nextRun: 'Invalid format',
+            nextRunTimestamp: Date.now() + 86400000,
+            nextRunText: 'Invalid format'
+          };
+        }
+
+        // Parse cron parts
+        const minute = parts[0];
+        const hour = parts[1];
+        const dayOfMonth = parts[2];
+        const month = parts[3];
+        const dayOfWeek = parts[4];
+
+        // Calculate next run time based on cron pattern
+        const nextRunInfo = calculateNextRun(minute, hour, dayOfMonth, month, dayOfWeek);
+
+        return {
+          isValid: true,
+          minute: minute,
+          hour: hour,
+          dayOfMonth: dayOfMonth,
+          month: month,
+          dayOfWeek: dayOfWeek,
+          nextRun: nextRunInfo,
+          nextRunText: nextRunInfo.text,
+          nextRunTimestamp: nextRunInfo.timestamp
+        };
+      } catch (error) {
+        console.error('Error parsing cron:', error);
+        return {
+          isValid: false,
+          nextRun: 'Error',
+          nextRunTimestamp: Date.now() + 86400000,
+          nextRunText: 'Error parsing'
+        };
+      }
+    }
+
+    function calculateNextRun(minute, hour, dayOfMonth, month, dayOfWeek) {
       const now = new Date();
-      const diff = now - date;
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+      const currentDay = now.getDate();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
+      let nextRun = new Date(now);
+
+      // Handle special characters in cron
+      try {
+        // For hourly jobs (0 * * * *)
+        if (minute === '0' && hour === '*' && dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+          // Run at the next hour
+          nextRun.setHours(currentHour + 1, 0, 0, 0);
+        }
+        // For jobs that run at specific hour daily (30 5 * * *)
+        else if (minute !== '*' && hour !== '*' && dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+          const targetHour = parseInt(hour);
+          const targetMinute = parseInt(minute);
+
+          nextRun.setHours(targetHour, targetMinute, 0, 0);
+
+          // If the time has already passed today, schedule for tomorrow
+          if (nextRun <= now) {
+            nextRun.setDate(nextRun.getDate() + 1);
+          }
+        }
+        // For hourly jobs with specific minute (0 * * * *)
+        else if (minute !== '*' && hour === '*' && dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+          const targetMinute = parseInt(minute);
+
+          if (currentMinute < targetMinute) {
+            // Run later this hour
+            nextRun.setMinutes(targetMinute, 0, 0);
+          } else {
+            // Run next hour
+            nextRun.setHours(currentHour + 1, targetMinute, 0, 0);
+          }
+        }
+        // For every minute jobs (* * * * *)
+        else if (minute === '*' && hour === '*' && dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+          // Run in 1 minute
+          nextRun.setMinutes(currentMinute + 1, 0, 0);
+        }
+        // For every X minutes (*/15 * * * *)
+        else if (minute.startsWith('*/')) {
+          const interval = parseInt(minute.substring(2));
+          const nextMinute = Math.ceil((currentMinute + 1) / interval) * interval;
+
+          if (nextMinute < 60) {
+            nextRun.setMinutes(nextMinute, 0, 0);
+          } else {
+            nextRun.setHours(currentHour + 1, 0, 0, 0);
+          }
+        }
+        // Default: add 1 hour
+        else {
+          nextRun.setHours(currentHour + 1, 0, 0, 0);
+        }
+      } catch (error) {
+        console.error('Error in next run calculation:', error);
+        nextRun.setHours(currentHour + 1, 0, 0, 0);
+      }
+
+      const diff = nextRun - now;
+
+      // Format the next run text
+      let text = '';
+      if (diff < 60000) { // Less than 1 minute
+        text = 'In less than 1 minute';
+      } else if (diff < 3600000) { // Less than 1 hour
+        const minutes = Math.floor(diff / 60000);
+        text = `In ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+      } else if (diff < 86400000) { // Less than 1 day
+        const hours = Math.floor(diff / 3600000);
+        text = `In ${hours} hour${hours !== 1 ? 's' : ''}`;
+      } else {
+        const days = Math.floor(diff / 86400000);
+        text = `In ${days} day${days !== 1 ? 's' : ''}`;
+      }
+
+      return {
+        text: text,
+        timestamp: nextRun.getTime(),
+        datetime: nextRun
+      };
+    }
+
+    function formatNextRun(date) {
+      const now = new Date();
+      const diff = date - now;
+
+      if (diff < 0) return 'Past due';
+
       const minutes = Math.floor(diff / 60000);
       const hours = Math.floor(diff / 3600000);
       const days = Math.floor(diff / 86400000);
 
-      if (minutes < 1) return 'Just now';
-      if (minutes < 60) return `${minutes}m ago`;
-      if (hours < 24) return `${hours}h ago`;
-      if (days < 7) return `${days}d ago`;
-      return date.toLocaleDateString();
+      if (minutes < 60) {
+        return `In ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+      } else if (hours < 24) {
+        return `In ${hours} hour${hours !== 1 ? 's' : ''}`;
+      } else {
+        return `In ${days} day${days !== 1 ? 's' : ''}`;
+      }
+    }
+
+    // ================== DATE FORMATTING FUNCTIONS ==================
+    function formatDate(dateString) {
+      if (!dateString || dateString === 'null' || dateString === 'N/A') return 'Never';
+
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Never';
+
+        const now = new Date();
+        const diff = now - date;
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (minutes < 1) return 'Just now';
+        if (minutes < 60) return `${minutes}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        if (days < 7) return `${days}d ago`;
+        return date.toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        console.error('Date parsing error:', e);
+        return dateString;
+      }
     }
 
     function formatDateTime(dateString) {
-      if (!dateString) return 'N/A';
-      return new Date(dateString).toLocaleString();
+      if (!dateString || dateString === 'null' || dateString === 'N/A') return 'N/A';
+
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString;
+        return date.toLocaleString('en-IN', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      } catch (e) {
+        console.error('DateTime parsing error:', e);
+        return dateString;
+      }
     }
 
+    // ================== STATUS FUNCTIONS ==================
     function getStatusClass(status) {
-      switch (status) {
-        case 'success': return 'status-success';
-        case 'running': return 'status-warning';
-        case 'failed': return 'status-critical';
-        case 'pending': return 'status-inactive';
-        default: return 'status-inactive';
+      if (!status) return 'status-pending';
+      const statusUpper = status.toString().toUpperCase();
+      switch (statusUpper) {
+        case 'SUCCESS':
+        case 'COMPLETED':
+          return 'status-success';
+        case 'STARTED':
+        case 'RUNNING':
+          return 'status-started';
+        case 'FAILED':
+        case 'ERROR':
+          return 'status-critical';
+        case 'PENDING':
+          return 'status-pending';
+        default:
+          return 'status-pending';
       }
     }
 
     function getStatusIcon(status) {
-      switch (status) {
-        case 'success': return 'bi-check-circle';
-        case 'running': return 'bi-arrow-clockwise';
-        case 'failed': return 'bi-x-circle';
-        case 'pending': return 'bi-clock';
-        default: return 'bi-question-circle';
+      if (!status) return 'bi-clock';
+      const statusUpper = status.toString().toUpperCase();
+      switch (statusUpper) {
+        case 'SUCCESS':
+        case 'COMPLETED':
+          return 'bi-check-circle';
+        case 'STARTED':
+        case 'RUNNING':
+          return 'bi-arrow-clockwise';
+        case 'FAILED':
+        case 'ERROR':
+          return 'bi-x-circle';
+        case 'PENDING':
+          return 'bi-clock';
+        default:
+          return 'bi-question-circle';
       }
     }
 
-    function calculateNextRun(cronExpression) {
-      // Simple mock calculation for next run
-      const now = new Date();
-      const next = new Date(now);
-      next.setHours(next.getHours() + 1);
-      return next.toISOString();
+    function formatDuration(seconds) {
+      if (!seconds || seconds === 'null' || seconds === 'N/A') return 'N/A';
+
+      const totalSeconds = parseInt(seconds);
+      if (isNaN(totalSeconds)) return seconds;
+
+      if (totalSeconds < 60) {
+        return `${totalSeconds}s`;
+      } else if (totalSeconds < 3600) {
+        const minutes = Math.floor(totalSeconds / 60);
+        const remainingSeconds = totalSeconds % 60;
+        return `${minutes}m ${remainingSeconds}s`;
+      } else {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        return `${hours}h ${minutes}m`;
+      }
     }
 
-    function fetchCronJobs() {
+    // ================== API FUNCTIONS ==================
+    async function loadActiveApplications() {
+      try {
+        const payload = {};
+        const encryptedPayload = encryptData(payload);
+        const url = API_CONFIG.baseUrl + API_CONFIG.endpoints.get_active_applications;
+
+        const response = await $.ajax({
+          url: url,
+          type: "POST",
+          dataType: "json",
+          data: { data: encryptedPayload }
+        });
+
+        if (response && response.success === 1) {
+          const decryptedData = decryptData(response.data);
+          API_DATA.applications = Array.isArray(decryptedData) ? decryptedData : [];
+          populateApplicationDropdowns();
+        } else {
+          API_DATA.applications = [];
+        }
+      } catch (error) {
+        console.error('Error loading active applications:', error);
+        API_DATA.applications = [];
+      }
+    }
+
+    function populateApplicationDropdowns() {
+      // Current tab dropdown
+      const currentAppSelect = $('#currentFilterApplication');
+      const historyAppSelect = $('#historyFilterApplication');
+
+      currentAppSelect.empty();
+      historyAppSelect.empty();
+
+      currentAppSelect.append('<option value="ALL" selected>All Applications</option>');
+      historyAppSelect.append('<option value="ALL" selected>All Applications</option>');
+
+      if (API_DATA.applications && API_DATA.applications.length > 0) {
+        API_DATA.applications
+          .sort((a, b) => (a.app_name || '').localeCompare(b.app_name || ''))
+          .forEach(app => {
+            currentAppSelect.append(
+              `<option value="${app.app_id || ''}">${app.app_name || 'Unknown'}</option>`
+            );
+            historyAppSelect.append(
+              `<option value="${app.app_id || ''}">${app.app_name || 'Unknown'}</option>`
+            );
+          });
+      }
+    }
+
+    async function fetchAllData() {
       showLoading(true);
 
-      setTimeout(() => {
-        // Join metadata with status
-        const jobs = mockDB.cron_jobs_metadata.map(metadata => {
-          const status = mockDB.cron_jobs_status.find(s => s.job_id === metadata.id);
-          const logs = mockDB.job_logs.filter(log => log.job_id === metadata.id);
-
-          return {
-            ...metadata,
-            status: status ? status.status : 'pending',
-            last_run: status ? status.last_run : null,
-            next_run: status ? status.next_run : calculateNextRun(metadata.cron_expression),
-            duration: status ? status.duration : null,
-            exit_code: status ? status.exit_code : null,
-            output: status ? status.output : '',
-            error_message: status ? status.error_message : '',
-            updated_at: status ? status.updated_at : metadata.created_at,
-            logs: logs
-          };
-        });
-
-        updateJobsTable(jobs);
-        showNotification('Data refreshed successfully', 'success');
+      try {
+        await Promise.all([
+          fetchCurrentStatus(),
+          fetchHistoryData()
+        ]);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        showNotification('Error fetching data: ' + (error.message || 'Unknown error'), 'danger');
+      } finally {
         showLoading(false);
-      }, 1000);
+      }
     }
 
-    function updateJobsTable(jobs) {
-      const tableBody = document.getElementById('jobsTableBody');
+    async function fetchCurrentStatus() {
+      try {
+        const payload = {
+          page_no: 1,
+          page_size: 1000
+        };
 
-      if (jobs.length === 0) {
+        const encryptedPayload = encryptData(payload);
+        const url = API_CONFIG.baseUrl + API_CONFIG.endpoints.get_execution_logs_paginated;
+
+        const response = await $.ajax({
+          url: url,
+          type: "POST",
+          dataType: "json",
+          data: { data: encryptedPayload }
+        });
+
+        if (response && response.success === 1) {
+          const decryptedData = decryptData(response.data);
+
+          let jobData = [];
+          if (decryptedData.data && Array.isArray(decryptedData.data)) {
+            jobData = decryptedData.data;
+          } else if (Array.isArray(decryptedData)) {
+            jobData = decryptedData;
+          } else {
+            jobData = [];
+          }
+
+          // Group by job name and get latest execution
+          const jobMap = new Map();
+          jobData.forEach(job => {
+            const key = job.exec_name || job.execution_name || 'unknown';
+            if (!jobMap.has(key) || new Date(job.started_at || job.start_time) > new Date(jobMap.get(key).started_at || jobMap.get(key).start_time)) {
+              jobMap.set(key, job);
+            }
+          });
+
+          jobsCurrentStatus = Array.from(jobMap.values()).map(job => {
+            const cronToParse = job.schedule || job.cron_expression || '0 * * * *';
+            const nextRunInfo = parseCronExpression(cronToParse);
+
+            // Determine actual status
+            let status = job.status || 'PENDING';
+            if (job.log_status) {
+              status = job.log_status;
+            }
+
+            return {
+              ...job,
+              exec_name: job.exec_name || job.execution_name || 'Unnamed Job',
+              app_name: job.app_name || 'Unknown',
+              app_code: job.app_code || '',
+              schedule: job.schedule || job.cron_expression || '0 * * * *',
+              status: status,
+              log_status: job.log_status || status,
+              started_at: job.started_at || job.start_time || null,
+              ended_at: job.ended_at || job.end_time || null,
+              nextRunText: nextRunInfo.nextRunText,
+              nextRunTimestamp: nextRunInfo.nextRunTimestamp
+            };
+          });
+
+          updateCurrentJobsTable(jobsCurrentStatus);
+        }
+      } catch (error) {
+        console.error('Error fetching current status:', error);
+      }
+    }
+
+    async function fetchHistoryData() {
+      try {
+        const payload = {
+          app_id: historyFilter.app_id || null,
+          status: historyFilter.status || null,
+          from_date: historyFilter.from_date || null,
+          to_date: historyFilter.to_date || null,
+          page_no: 1,
+          page_size: 1000
+        };
+
+        const encryptedPayload = encryptData(payload);
+        const url = API_CONFIG.baseUrl + API_CONFIG.endpoints.get_execution_logs_paginated;
+
+        const response = await $.ajax({
+          url: url,
+          type: "POST",
+          dataType: "json",
+          data: { data: encryptedPayload }
+        });
+
+        if (response && response.success === 1) {
+          const decryptedData = decryptData(response.data);
+
+          if (decryptedData.data && Array.isArray(decryptedData.data)) {
+            allJobsHistory = decryptedData.data;
+          } else if (Array.isArray(decryptedData)) {
+            allJobsHistory = decryptedData;
+          } else {
+            allJobsHistory = [];
+          }
+
+          updateHistoryJobsTable(allJobsHistory);
+        }
+      } catch (error) {
+        console.error('Error fetching history data:', error);
+      }
+    }
+
+    function updateCurrentJobsTable(jobs) {
+      const tableBody = document.getElementById('currentJobsTableBody');
+
+      if (!jobs || jobs.length === 0) {
         tableBody.innerHTML = `
-          <tr>
-            <td colspan="10" class="text-center py-3 text-muted">
-              <i class="bi bi-inbox"></i>
-              <p class="mt-1">No jobs found</p>
-            </td>
-          </tr>
-        `;
+      <tr>
+        <td colspan="8" class="text-center py-3 text-muted">
+          <i class="bi bi-inbox"></i>
+          <p class="mt-1">No jobs found</p>
+        </td>
+      </tr>
+    `;
+
+        if (currentDataTable) {
+          currentDataTable.destroy();
+          currentDataTable = null;
+        }
         return;
       }
 
-      tableBody.innerHTML = jobs.map(job => `
-        <tr>
-          <td>
-            <div class="d-flex align-items-center">
-              <i class="bi bi-clock me-2 text-primary"></i>
-              <div>
-                <strong>${job.job_name}</strong>
-                <div class="small text-muted">${job.description}</div>
-              </div>
-            </div>
-          </td>
-          <td>
-            <span class="badge bg-light text-dark">${job.application}</span>
-          </td>
-          <td>
-            <code class="small">${job.server_name}</code>
-          </td>
-          <td>
-            <span class="cron-expression">${job.cron_expression}</span>
-          </td>
-          <td>${formatDate(job.last_run)}</td>
-          <td>
-            ${job.duration ? `
-              <span class="duration-badge">
-                <i class="bi bi-stopwatch me-1"></i>${job.duration}
-              </span>
-            ` : '<span class="text-muted">N/A</span>'}
-          </td>
-          <td>${formatDate(job.next_run)}</td>
-          <td>
-            <span class="status-badge ${getStatusClass(job.status)}">
-              <i class="bi ${getStatusIcon(job.status)} me-1"></i>
-              ${job.status.toUpperCase()}
-            </span>
-          </td>
-          <td>
-            ${job.error_message ? `
-              <div class="error-message" title="${job.error_message}">
-                <i class="bi bi-exclamation-triangle text-danger me-1"></i>
-                ${job.error_message}
-              </div>
-            ` : '<span class="text-muted small">-</span>'}
-          </td>
-          <td>
-            <div class="action-btns">
-              <button class="btn btn-sm btn-primary" onclick="showJobDetails(${job.id})" title="View Details">
-                <i class="bi bi-eye"></i>
-              </button>
-              <button class="btn btn-sm btn-success" onclick="runJobNow(${job.id})" title="Run Now">
-                <i class="bi bi-play"></i>
-              </button>
-              <button class="btn btn-sm btn-info" onclick="downloadJobLogs(${job.id})" title="Download Logs">
-                <i class="bi bi-download"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
+      // Apply filters
+      let filteredJobs = jobs;
+      if (currentFilter.app_id && currentFilter.app_id !== 'ALL') {
+        filteredJobs = filteredJobs.filter(job => job.app_id == currentFilter.app_id);
+      }
+      if (currentFilter.status && currentFilter.status !== 'ALL') {
+        filteredJobs = filteredJobs.filter(job =>
+          (job.status || '').toUpperCase() === currentFilter.status ||
+          (job.log_status || '').toUpperCase() === currentFilter.status
+        );
+      }
+      if (currentFilter.search) {
+        const searchLower = currentFilter.search.toLowerCase();
+        filteredJobs = filteredJobs.filter(job =>
+          (job.exec_name || '').toLowerCase().includes(searchLower) ||
+          (job.app_name || '').toLowerCase().includes(searchLower)
+        );
+      }
 
-      // Initialize DataTable if not already initialized
-      if (!dataTable) {
-        dataTable = $('#jobsTable').DataTable({
+      // Calculate next run timestamps properly for sorting
+      filteredJobs = filteredJobs.map(job => {
+        // If nextRunTimestamp is not set or is invalid, calculate it
+        if (!job.nextRunTimestamp || job.nextRunTimestamp === Date.now() + 86400000) {
+          const cronToParse = job.schedule || '0 * * * *';
+          const nextRunInfo = parseCronExpression(cronToParse);
+          job.nextRunTimestamp = nextRunInfo.nextRunTimestamp;
+          job.nextRunText = nextRunInfo.nextRunText;
+        }
+        return job;
+      });
+
+      // Sort: First by status (STARTED at the top), then by next run time ascending (sooner first)
+      filteredJobs.sort((a, b) => {
+        // First priority: Status 'STARTED' or 'RUNNING' comes first
+        const statusA = (a.status || '').toUpperCase();
+        const statusB = (b.status || '').toUpperCase();
+
+        const isStartedA = statusA === 'STARTED' || statusA === 'RUNNING';
+        const isStartedB = statusB === 'STARTED' || statusB === 'RUNNING';
+
+        if (isStartedA && !isStartedB) return -1;
+        if (!isStartedA && isStartedB) return 1;
+
+        // Second priority: Next run time ascending (sooner runs appear first)
+        // Convert "In X minutes/hours" to actual timestamps for comparison
+        const timestampA = a.nextRunTimestamp || Number.MAX_VALUE;
+        const timestampB = b.nextRunTimestamp || Number.MAX_VALUE;
+
+        return timestampA - timestampB;
+      });
+
+      // Log the sorted order for debugging
+      console.log('Sorted jobs by next run:');
+      filteredJobs.forEach(job => {
+        console.log(`${job.exec_name}: ${job.nextRunText} (${new Date(job.nextRunTimestamp).toLocaleString()})`);
+      });
+
+      tableBody.innerHTML = filteredJobs.map(job => {
+        // Get last run time
+        let lastRun = 'N/A';
+        if (job.started_at) {
+          lastRun = formatDateTime(job.started_at);
+        } else if (job.last_run) {
+          lastRun = formatDateTime(job.last_run);
+        }
+
+        return `
+      <tr>
+        <td>
+          <div class="d-flex align-items-center">
+            <i class="bi bi-clock me-2 text-primary"></i>
+            <div>
+              <strong>${job.exec_name || 'Unnamed Job'}</strong>
+              <div class="next-run">Next: ${job.nextRunText || 'Unknown'}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div>
+            <strong>${job.app_name || 'Unknown'}</strong>
+            <div class="small text-muted">${job.app_code || ''}</div>
+          </div>
+        </td>
+        <td>
+          <span class="cron-expression" title="${job.schedule || 'N/A'}">${job.schedule || 'N/A'}</span>
+        </td>
+        <td>
+          <span class="status-badge ${getStatusClass(job.status)}">
+            <i class="bi ${getStatusIcon(job.status)} me-1"></i>
+            ${(job.status || 'PENDING').toUpperCase()}
+          </span>
+        </td>
+        <td>
+          <span class="status-badge ${getStatusClass(job.log_status)}">
+            <i class="bi ${getStatusIcon(job.log_status)} me-1"></i>
+            ${(job.log_status || 'PENDING').toUpperCase()}
+          </span>
+        </td>
+        <td>${lastRun}</td>
+        <td>
+          <span class="next-run">${job.nextRunText || 'Unknown'}</span>
+        </td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-sm btn-primary" onclick='showJobDetails(${JSON.stringify(job).replace(/'/g, "&#39;")})' title="View Details">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button class="btn btn-sm btn-info" onclick='showJobHistory("${job.exec_name || ''}")' title="View History">
+              <i class="bi bi-clock-history"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+      }).join('');
+
+      // Initialize or update DataTable
+      if ($.fn.DataTable.isDataTable('#currentJobsTable')) {
+        currentDataTable = $('#currentJobsTable').DataTable();
+        currentDataTable.clear();
+        currentDataTable.rows.add($('#currentJobsTableBody tr'));
+        currentDataTable.draw();
+      } else {
+        currentDataTable = $('#currentJobsTable').DataTable({
           pageLength: 10,
-          lengthMenu: [10, 25, 50, 100],
+          lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+          searching: false,
+          ordering: true,
+          info: true,
+          paging: true,
+          order: [], // Disable initial ordering to preserve our custom sort
           language: {
-            search: "Search jobs:"
+            emptyTable: "No jobs found",
+            info: "Showing _START_ to _END_ of _TOTAL_ jobs",
+            infoEmpty: "Showing 0 to 0 of 0 jobs",
+            infoFiltered: "(filtered from _MAX_ total jobs)",
+            lengthMenu: "Show _MENU_ jobs per page",
+            paginate: {
+              first: '<i class="bi bi-chevron-double-left"></i>',
+              previous: '<i class="bi bi-chevron-left"></i>',
+              next: '<i class="bi bi-chevron-right"></i>',
+              last: '<i class="bi bi-chevron-double-right"></i>'
+            }
           },
           columnDefs: [
-            { orderable: true, targets: [0, 1, 4, 5, 6, 7, 8] },
-            { orderable: false, targets: [2, 3, 9] }
-          ]
-        });
-      } else {
-        dataTable.destroy();
-        dataTable = $('#jobsTable').DataTable({
-          pageLength: 10,
-          lengthMenu: [10, 25, 50, 100],
-          language: {
-            search: "Search jobs:"
-          }
+            { orderable: false, targets: [7] } // Actions column not orderable
+          ],
+          dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
         });
       }
     }
 
-    function showJobDetails(jobId) {
-      currentJobId = jobId;
-      const metadata = mockDB.cron_jobs_metadata.find(j => j.id === jobId);
-      const status = mockDB.cron_jobs_status.find(s => s.job_id === jobId);
-      const logs = mockDB.job_logs.filter(log => log.job_id === jobId);
+    function updateHistoryJobsTable(jobs) {
+      const tableBody = document.getElementById('historyJobsTableBody');
 
-      if (!metadata) {
-        showNotification('Job not found', 'danger');
+      if (!jobs || jobs.length === 0) {
+        tableBody.innerHTML = `
+      <tr>
+        <td colspan="9" class="text-center py-5">
+          <div class="empty-state">
+            <i class="bi bi-clock-history" style="font-size: 3rem; color: #cbd5e1;"></i>
+            <p class="mt-3 text-muted">No execution history found</p>
+          </div>
+        </td>
+      </tr>
+    `;
+
+        if (historyDataTable) {
+          historyDataTable.destroy();
+          historyDataTable = null;
+        }
         return;
       }
 
-      document.getElementById('detailModalTitle').textContent = `Job Details: ${metadata.job_name}`;
-      document.getElementById('detailModalBody').innerHTML = `
+      // Apply filters
+      let filteredJobs = jobs;
+      if (historyFilter.app_id && historyFilter.app_id !== 'ALL') {
+        filteredJobs = filteredJobs.filter(job => job.app_id == historyFilter.app_id);
+      }
+      if (historyFilter.status && historyFilter.status !== 'ALL') {
+        filteredJobs = filteredJobs.filter(job =>
+          (job.status || '').toUpperCase() === historyFilter.status ||
+          (job.log_status || '').toUpperCase() === historyFilter.status
+        );
+      }
+      if (historyFilter.from_date) {
+        const fromDate = new Date(historyFilter.from_date).setHours(0, 0, 0, 0);
+        filteredJobs = filteredJobs.filter(job => {
+          const jobDate = new Date(job.started_at || job.start_time || 0).setHours(0, 0, 0, 0);
+          return jobDate >= fromDate;
+        });
+      }
+      if (historyFilter.to_date) {
+        const toDate = new Date(historyFilter.to_date).setHours(23, 59, 59, 999);
+        filteredJobs = filteredJobs.filter(job => {
+          const jobDate = new Date(job.started_at || job.start_time || 0).getTime();
+          return jobDate <= toDate;
+        });
+      }
+
+      // Sort by started_at descending (newest first)
+      filteredJobs.sort((a, b) => {
+        const dateA = new Date(a.started_at || a.start_time || 0).getTime();
+        const dateB = new Date(b.started_at || b.start_time || 0).getTime();
+        return dateB - dateA;
+      });
+
+      tableBody.innerHTML = filteredJobs.map((job, index) => {
+        const jobName = job.exec_name || job.execution_name || 'Unnamed Job';
+        const appName = job.app_name || 'Unknown';
+        const appCode = job.app_code || '';
+        const schedule = job.schedule || job.cron_expression || 'N/A';
+        const status = job.status || 'PENDING';
+        const logStatus = job.log_status || status;
+        const startedAt = job.started_at || job.start_time || null;
+        const endedAt = job.ended_at || job.end_time || null;
+        const duration = job.duration_sec || null;
+        const runId = job.run_id || '';
+        const errorMessage = job.error_message || '';
+        const errorCode = job.error_code || '';
+
+        // Create a unique ID for this error modal
+        const modalId = `errorModal-${index}-${runId.substring(0, 8)}`;
+
+        // Error display with button
+        let errorDisplay = '';
+
+        if (errorMessage && errorMessage.trim() !== '') {
+          // Preview of error
+          const previewText = errorMessage.length > 40 ? errorMessage.substring(0, 40) + '…' : errorMessage;
+
+          errorDisplay = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          ">
+            <i class="bi bi-exclamation-triangle-fill me-1" style="font-size: 0.65rem;"></i>
+            ${previewText}
+          </div>
+          <button 
+            class="btn btn-sm btn-outline-danger" 
+            style="padding: 2px 8px; font-size: 0.65rem; border-radius: 4px;"
+            onclick='showErrorModal(${JSON.stringify({
+            jobName: jobName,
+            runId: runId,
+            errorMessage: errorMessage,
+            errorCode: errorCode,
+            startedAt: startedAt,
+            appName: appName
+          }).replace(/'/g, "&#39;")})'
+            title="View full error"
+          >
+            <i class="bi bi-eye"></i> View
+          </button>
+        </div>
+      `;
+        } else if (errorCode && errorCode.trim() !== '') {
+          errorDisplay = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="
+            background: #fff3cd;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+          ">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            Code: ${errorCode}
+          </span>
+        </div>
+      `;
+        } else {
+          errorDisplay = `
+        <span style="
+          display: inline-block;
+          width: 24px;
+          height: 24px;
+          line-height: 24px;
+          text-align: center;
+          color: #cbd5e1;
+          font-size: 0.85rem;
+          font-weight: 300;
+        ">—</span>
+      `;
+        }
+
+        return `
+    <tr>
+      <td>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #4361ee10, #7209b710);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+          ">
+            <i class="bi bi-gear"></i>
+          </div>
+          <div>
+            <div style="font-weight: 600; font-size: 0.85rem;">${jobName}</div>
+            <div style="font-size: 0.65rem; color: #64748b;">${runId ? runId.substring(0, 8) : ''}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div>
+          <div style="font-weight: 500;">${appName}</div>
+          <div style="font-size: 0.65rem; color: #64748b;">${appCode}</div>
+        </div>
+      </td>
+      <td>
+        <code style="
+          background: #f1f5f9;
+          padding: 3px 6px;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          color: #334155;
+        ">${schedule}</code>
+      </td>
+      <td>
+        <span class="status-badge ${getStatusClass(status)}" style="padding: 4px 8px;">
+          <i class="bi ${getStatusIcon(status)} me-1"></i>
+          ${status.toUpperCase()}
+        </span>
+      </td>
+      <td>
+        <span class="status-badge ${getStatusClass(logStatus)}" style="padding: 4px 8px;">
+          <i class="bi ${getStatusIcon(logStatus)} me-1"></i>
+          ${logStatus.toUpperCase()}
+        </span>
+      </td>
+      <td style="font-size: 0.75rem; white-space: nowrap;">${formatDateTime(startedAt)}</td>
+      <td style="font-size: 0.75rem; white-space: nowrap;">${formatDateTime(endedAt)}</td>
+      <td>
+        ${duration ? `
+          <span style="
+            background: #e8f0fe;
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            white-space: nowrap;
+          ">
+            <i class="bi bi-stopwatch me-1"></i>${formatDuration(duration)}
+          </span>
+        ` : '<span style="color: #cbd5e1;">—</span>'}
+      </td>
+      <td style="min-width: 200px;">
+        ${errorDisplay}
+      </td>
+    </tr>
+  `}).join('');
+
+      // Initialize or update DataTable
+      if ($.fn.DataTable.isDataTable('#historyJobsTable')) {
+        historyDataTable = $('#historyJobsTable').DataTable();
+        historyDataTable.clear();
+        historyDataTable.rows.add($('#historyJobsTableBody tr'));
+        historyDataTable.draw();
+      } else {
+        historyDataTable = $('#historyJobsTable').DataTable({
+          pageLength: 10,
+          lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+          searching: true,
+          ordering: true,
+          info: true,
+          paging: true,
+          language: {
+            search: "Search jobs:",
+            emptyTable: "No execution history found",
+            info: "Showing _START_ to _END_ of _TOTAL_ executions",
+            infoEmpty: "Showing 0 to 0 of 0 executions",
+            infoFiltered: "(filtered from _MAX_ total executions)",
+            lengthMenu: "Show _MENU_ executions per page",
+            paginate: {
+              first: '<i class="bi bi-chevron-double-left"></i>',
+              previous: '<i class="bi bi-chevron-left"></i>',
+              next: '<i class="bi bi-chevron-right"></i>',
+              last: '<i class="bi bi-chevron-double-right"></i>'
+            }
+          },
+          columnDefs: [
+            { orderable: true, targets: '_all' }
+          ],
+          dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
+        });
+      }
+    }
+
+    // Function to show error details in a modal
+    function showErrorModal(errorData) {
+      // Remove any existing modal
+      const existingModal = document.getElementById('errorDetailModal');
+      if (existingModal) {
+        existingModal.remove();
+      }
+
+      // Create modal element
+      const modalHtml = `
+    <div class="modal fade" id="errorDetailModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+          <div class="modal-header" style="
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-bottom: 1px solid #fecaca;
+            border-radius: 12px 12px 0 0;
+            padding: 1rem 1.5rem;
+          ">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="
+                width: 40px;
+                height: 40px;
+                background: #b91c1c;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.2rem;
+              ">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+              </div>
+              <div>
+                <h5 class="modal-title" style="font-weight: 700; color: #7f1d1d; margin-bottom: 4px;">
+                  Error Details
+                </h5>
+                <div style="font-size: 0.75rem; color: #991b1b;">
+                  ${errorData.jobName} • ${errorData.runId ? 'Run ID: ' + errorData.runId : ''}
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: white; opacity: 0.8;"></button>
+          </div>
+          <div class="modal-body" style="padding: 1.5rem; background: #fef2f2;">
+            <!-- Error Info Cards -->
+            <div style="display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+              <div style="
+                flex: 1;
+                background: white;
+                padding: 12px 16px;
+                border-radius: 10px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+                border: 1px solid #fee2e2;
+              ">
+                <div style="font-size: 0.65rem; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Application
+                </div>
+                <div style="font-weight: 600; color: #1e293b;">${errorData.appName || 'N/A'}</div>
+              </div>
+              <div style="
+                flex: 1;
+                background: white;
+                padding: 12px 16px;
+                border-radius: 10px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+                border: 1px solid #fee2e2;
+              ">
+                <div style="font-size: 0.65rem; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Timestamp
+                </div>
+                <div style="font-weight: 600; color: #1e293b;">${formatDateTime(errorData.startedAt)}</div>
+              </div>
+              ${errorData.errorCode ? `
+              <div style="
+                flex: 1;
+                background: white;
+                padding: 12px 16px;
+                border-radius: 10px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+                border: 1px solid #fee2e2;
+              ">
+                <div style="font-size: 0.65rem; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Error Code
+                </div>
+                <div style="font-weight: 600; color: #b91c1c;">${errorData.errorCode}</div>
+              </div>
+              ` : ''}
+            </div>
+            
+            <!-- Full Error Message -->
+            <div style="
+              background: #1e293b;
+              border-radius: 10px;
+              padding: 20px;
+              border: 1px solid #334155;
+            ">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #334155;">
+                <i class="bi bi-bug" style="color: #ef4444; font-size: 1rem;"></i>
+                <span style="color: #f87171; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Full Error Message
+                </span>
+              </div>
+              <pre style="
+                margin: 0;
+                color: #e2e8f0;
+                font-family: 'Monaco', 'Menlo', 'Cascadia Code', monospace;
+                font-size: 0.8rem;
+                line-height: 1.6;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                background: transparent;
+                border: none;
+                padding: 0;
+                max-height: 400px;
+                overflow-y: auto;
+              ">${(errorData.errorMessage || 'No error message available').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+            </div>
+            
+            <!-- Stack Trace Note -->
+            <div style="
+              margin-top: 16px;
+              padding: 12px;
+              background: #fff3cd;
+              border: 1px solid #ffeeba;
+              border-radius: 8px;
+              color: #856404;
+              font-size: 0.7rem;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            ">
+              <i class="bi bi-info-circle-fill"></i>
+              <span>This error occurred during job execution. Check the logs for more details about the stack trace.</span>
+            </div>
+          </div>
+          <div class="modal-footer" style="
+            border-top: 1px solid #fee2e2;
+            padding: 1rem 1.5rem;
+            background: #fef2f2;
+            border-radius: 0 0 12px 12px;
+          ">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="
+              border: 1px solid #e2e8f0;
+              padding: 0.5rem 1.2rem;
+              font-size: 0.8rem;
+              font-weight: 500;
+              border-radius: 8px;
+            ">Close</button>
+            <button type="button" class="btn btn-danger" onclick="downloadErrorLog('${errorData.runId}')" style="
+              background: #b91c1c;
+              border: none;
+              padding: 0.5rem 1.2rem;
+              font-size: 0.8rem;
+              font-weight: 500;
+              border-radius: 8px;
+            ">
+              <i class="bi bi-download me-2"></i>Download Error Log
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+      // Append modal to body
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+      // Show the modal
+      const modal = new bootstrap.Modal(document.getElementById('errorDetailModal'));
+      modal.show();
+
+      // Clean up when modal is hidden
+      document.getElementById('errorDetailModal').addEventListener('hidden.bs.modal', function () {
+        this.remove();
+      });
+    }
+
+    // Function to download error log (placeholder)
+    function downloadErrorLog(runId) {
+      if (!runId) {
+        showNotification('No run ID available for this error', 'warning');
+        return;
+      }
+      showNotification(`Downloading error log for run ID: ${runId}...`, 'info');
+    }
+
+    function filterCurrentJobs() {
+      currentFilter = {
+        app_id: document.getElementById('currentFilterApplication').value === 'ALL' ? null : document.getElementById('currentFilterApplication').value,
+        status: document.getElementById('currentFilterStatus').value === 'ALL' ? null : document.getElementById('currentFilterStatus').value,
+        search: document.getElementById('currentFilterSearch').value
+      };
+
+      updateCurrentJobsTable(jobsCurrentStatus);
+      showNotification('Filters applied', 'info');
+    }
+
+    function clearCurrentFilters() {
+      document.getElementById('currentFilterApplication').value = 'ALL';
+      document.getElementById('currentFilterStatus').value = 'ALL';
+      document.getElementById('currentFilterSearch').value = '';
+
+      currentFilter = {
+        app_id: null,
+        status: null,
+        search: ''
+      };
+
+      updateCurrentJobsTable(jobsCurrentStatus);
+      showNotification('Filters cleared', 'info');
+    }
+
+    function filterHistoryJobs() {
+      historyFilter = {
+        app_id: document.getElementById('historyFilterApplication').value === 'ALL' ? null : document.getElementById('historyFilterApplication').value,
+        status: document.getElementById('historyFilterStatus').value === 'ALL' ? null : document.getElementById('historyFilterStatus').value,
+        from_date: document.getElementById('historyFilterFromDate').value || null,
+        to_date: document.getElementById('historyFilterToDate').value || null
+      };
+
+      fetchHistoryData();
+      showNotification('Filters applied', 'info');
+    }
+
+    function clearHistoryFilters() {
+      document.getElementById('historyFilterApplication').value = 'ALL';
+      document.getElementById('historyFilterStatus').value = 'ALL';
+      document.getElementById('historyFilterFromDate').value = '';
+      document.getElementById('historyFilterToDate').value = '';
+
+      historyFilter = {
+        app_id: null,
+        status: null,
+        from_date: null,
+        to_date: null
+      };
+
+      fetchHistoryData();
+      showNotification('Filters cleared', 'info');
+    }
+
+    // ================== UI FUNCTIONS ==================
+    function showJobDetails(jobData) {
+      let job;
+      if (typeof jobData === 'string') {
+        try {
+          job = JSON.parse(jobData);
+        } catch (e) {
+          console.error('Error parsing job data:', e);
+          return;
+        }
+      } else {
+        job = jobData;
+      }
+
+      document.getElementById('detailModalTitle').textContent = `Job Details: ${job.exec_name || 'Unknown Job'}`;
+
+      const detailsHtml = `
         <div class="detail-card">
           <div class="row">
             <div class="col-md-6">
               <div class="detail-section">
                 <div class="detail-label">Job Name</div>
-                <div class="detail-value">${metadata.job_name}</div>
-              </div>
-              <div class="detail-section">
-                <div class="detail-label">Description</div>
-                <div class="detail-value">${metadata.description || 'No description'}</div>
+                <div class="detail-value">${job.exec_name || 'N/A'}</div>
               </div>
               <div class="detail-section">
                 <div class="detail-label">Application</div>
-                <div class="detail-value">${metadata.application}</div>
+                <div class="detail-value">${job.app_name || 'N/A'} ${job.app_code ? `(${job.app_code})` : ''}</div>
               </div>
               <div class="detail-section">
-                <div class="detail-label">Server Name</div>
-                <div class="detail-value"><code>${metadata.server_name}</code></div>
+                <div class="detail-label">Schedule</div>
+                <div class="detail-value">
+                  <code class="cron-expression">${job.schedule || 'N/A'}</code>
+                </div>
               </div>
             </div>
             <div class="col-md-6">
               <div class="detail-section">
                 <div class="detail-label">Status</div>
-                <span class="status-badge ${getStatusClass(status?.status || 'pending')}">
-                  <i class="bi ${getStatusIcon(status?.status || 'pending')} me-1"></i>
-                  ${(status?.status || 'pending').toUpperCase()}
+                <span class="status-badge ${getStatusClass(job.status)}">
+                  <i class="bi ${getStatusIcon(job.status)} me-1"></i>
+                  ${(job.status || 'PENDING').toUpperCase()}
                 </span>
               </div>
               <div class="detail-section">
-                <div class="detail-label">Last Duration</div>
-                <div class="detail-value">
-                  ${status?.duration ? `
-                    <span class="duration-badge">
-                      <i class="bi bi-stopwatch me-1"></i>${status.duration}
-                    </span>
-                  ` : '<span class="text-muted">N/A</span>'}
-                </div>
+                <div class="detail-label">Log Status</div>
+                <span class="status-badge ${getStatusClass(job.log_status)}">
+                  <i class="bi ${getStatusIcon(job.log_status)} me-1"></i>
+                  ${(job.log_status || 'PENDING').toUpperCase()}
+                </span>
               </div>
               <div class="detail-section">
-                <div class="detail-label">Average Duration</div>
-                <div class="detail-value">
-                  ${metadata.avg_duration ? `
-                    <span class="duration-badge">
-                      <i class="bi bi-clock-history me-1"></i>${metadata.avg_duration}
-                    </span>
-                  ` : '<span class="text-muted">N/A</span>'}
-                </div>
+                <div class="detail-label">Run ID</div>
+                <div class="detail-value"><code>${job.run_id || 'N/A'}</code></div>
               </div>
               <div class="detail-section">
-                <div class="detail-label">Last Run</div>
-                <div class="detail-value">${formatDateTime(status?.last_run)}</div>
+                <div class="detail-label">Duration</div>
+                <div class="detail-value">
+                  ${job.duration_sec ? `
+                    <span class="duration-badge">
+                      <i class="bi bi-stopwatch me-1"></i>${formatDuration(job.duration_sec)}
+                    </span>
+                  ` : 'N/A'}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <div class="detail-section">
+                <div class="detail-label">Started At</div>
+                <div class="detail-value">${formatDateTime(job.started_at || job.start_time)}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-section">
+                <div class="detail-label">Ended At</div>
+                <div class="detail-value">${formatDateTime(job.ended_at || job.end_time)}</div>
               </div>
             </div>
           </div>
@@ -1116,470 +1929,152 @@
           <div class="row">
             <div class="col-md-6">
               <div class="detail-section">
-                <div class="detail-label">Table Name</div>
-                <div class="detail-value">${metadata.table_name || 'N/A'}</div>
+                <div class="detail-label">Exec Type</div>
+                <div class="detail-value">${job.exec_type || 'N/A'}</div>
               </div>
             </div>
             <div class="col-md-6">
               <div class="detail-section">
-                <div class="detail-label">Next Run</div>
-                <div class="detail-value">${formatDateTime(status?.next_run)}</div>
+                <div class="detail-label">Trigger Type</div>
+                <div class="detail-value">${job.trigger_type || 'N/A'}</div>
               </div>
             </div>
           </div>
           
-          ${status?.error_message ? `
+          <div class="row">
+            <div class="col-md-6">
+              <div class="detail-section">
+                <div class="detail-label">Trigger Source</div>
+                <div class="detail-value">${job.trigger_source || 'N/A'}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-section">
+                <div class="detail-label">Triggered By</div>
+                <div class="detail-value">${job.triggered_by || 'N/A'}</div>
+              </div>
+            </div>
+          </div>
+          
+          ${job.error_message ? `
             <div class="detail-section">
-              <div class="detail-label">Error Message</div>
-              <div class="detail-value text-danger">
+              <div class="detail-label text-danger">Error Message</div>
+              <div class="detail-value text-danger p-2 bg-light rounded">
                 <i class="bi bi-exclamation-triangle me-2"></i>
-                ${status.error_message}
+                ${job.error_message}
               </div>
             </div>
           ` : ''}
           
-          <div class="detail-section">
-            <div class="detail-label">Cron Expression</div>
-            <div class="detail-value">
-              <code class="cron-expression">${metadata.cron_expression}</code>
-              <small class="text-muted ms-2">${getCronDescription(metadata.cron_expression)}</small>
-            </div>
-          </div>
-          
-          <div class="detail-section">
-            <div class="detail-label">Command/Procedure</div>
-            <div class="detail-value">
-              <pre class="bg-dark text-light p-2 rounded small" style="font-size: 0.7rem;">${metadata.command}</pre>
-            </div>
-          </div>
-          
-          ${status ? `
+          ${job.error_code ? `
             <div class="detail-section">
-              <div class="detail-label">Last Execution Details</div>
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="detail-value"><strong>Duration:</strong> ${status.duration || 'N/A'}</div>
-                </div>
-                <div class="col-md-6">
-                  <div class="detail-value"><strong>Exit Code:</strong> ${status.exit_code !== null ? status.exit_code : 'N/A'}</div>
-                </div>
-              </div>
-              <div class="mt-2">
-                <div class="detail-value"><strong>Output:</strong></div>
-                <div class="bg-light p-2 rounded small mt-1">${status.output || 'No output'}</div>
-              </div>
+              <div class="detail-label">Error Code</div>
+              <div class="detail-value"><code>${job.error_code}</code></div>
             </div>
           ` : ''}
-          
-          <div class="detail-section">
-            <div class="detail-label">Recent Logs (${logs.length} entries)</div>
-            <div>
-              ${logs.length > 0 ? logs.slice(-5).map(log => `
-                <div class="log-entry ${log.type}">
-                  <div class="d-flex justify-content-between">
-                    <small>${formatDateTime(log.timestamp)}</small>
-                    <small class="text-${log.type === 'error' ? 'danger' : log.type === 'warning' ? 'warning' : 'success'}">
-                      ${log.type.toUpperCase()}
-                    </small>
-                  </div>
-                  <div>${log.message}</div>
-                </div>
-              `).join('') : '<div class="text-muted">No logs available</div>'}
-              ${logs.length > 5 ? `<div class="text-center mt-2"><small>... and ${logs.length - 5} more entries</small></div>` : ''}
-            </div>
-          </div>
           
           <div class="mt-3">
-            <button class="btn btn-success btn-sm" onclick="runJobNow(${metadata.id})">
-              <i class="bi bi-play me-1"></i>Run Now
-            </button>
-            <button class="btn btn-info btn-sm ms-2" onclick="downloadJobLogs(${metadata.id})">
+            <button class="btn btn-info btn-sm" onclick="downloadJobLogs('${job.run_id || ''}')">
               <i class="bi bi-download me-1"></i>Download Logs
+            </button>
+            <button class="btn btn-primary btn-sm ms-2" onclick='showJobHistory("${job.exec_name || ''}")'>
+              <i class="bi bi-clock-history me-1"></i>View History
             </button>
           </div>
         </div>
       `;
 
+      document.getElementById('detailModalBody').innerHTML = detailsHtml;
       new bootstrap.Modal(document.getElementById('detailModal')).show();
     }
 
-    function runJobNow(jobId) {
-      const job = mockDB.cron_jobs_metadata.find(j => j.id === jobId);
-      if (!job) {
-        showNotification('Job not found', 'danger');
+    function showJobHistory(jobName) {
+      const jobExecutions = allJobsHistory.filter(job => job.exec_name === jobName || job.execution_name === jobName);
+
+      if (jobExecutions.length === 0) {
+        showNotification(`No history found for job: ${jobName}`, 'info');
         return;
       }
 
-      showNotification(`Running job: ${job.job_name}...`, 'info');
+      document.getElementById('historyModalTitle').textContent = `Execution History: ${jobName}`;
 
-      // Simulate job execution
-      setTimeout(() => {
-        // Update status
-        const statusIndex = mockDB.cron_jobs_status.findIndex(s => s.job_id === jobId);
-        if (statusIndex !== -1) {
-          mockDB.cron_jobs_status[statusIndex] = {
-            ...mockDB.cron_jobs_status[statusIndex],
-            last_run: new Date().toISOString(),
-            status: 'success',
-            duration: job.avg_duration || '45s',
-            exit_code: 0,
-            output: 'Job executed successfully',
-            error_message: '',
-            updated_at: new Date().toISOString()
-          };
-        }
+      const historyHtml = `
+        <div class="table-responsive">
+          <table class="table table-sm table-hover">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Log Status</th>
+                <th>Started At</th>
+                <th>Ended At</th>
+                <th>Duration</th>
+                <th>Run ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${jobExecutions.map(exec => {
+        const status = exec.status || 'PENDING';
+        const logStatus = exec.log_status || status;
+        const startedAt = exec.started_at || exec.start_time;
+        const endedAt = exec.ended_at || exec.end_time;
+        const duration = exec.duration_sec;
+        const runId = exec.run_id || '';
 
-        // Add log entry
-        mockDB.job_logs.push({
-          id: mockDB.job_logs.length + 1,
-          job_id: jobId,
-          timestamp: new Date().toISOString(),
-          message: 'Job executed manually',
-          type: 'success'
-        });
+        return `
+                <tr>
+                  <td>
+                    <span class="status-badge ${getStatusClass(status)}">
+                      <i class="bi ${getStatusIcon(status)} me-1"></i>
+                      ${status.toUpperCase()}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-badge ${getStatusClass(logStatus)}">
+                      <i class="bi ${getStatusIcon(logStatus)} me-1"></i>
+                      ${logStatus.toUpperCase()}
+                    </span>
+                  </td>
+                  <td>${formatDateTime(startedAt)}</td>
+                  <td>${formatDateTime(endedAt)}</td>
+                  <td>
+                    ${duration ? `
+                      <span class="duration-badge">
+                        <i class="bi bi-stopwatch me-1"></i>${formatDuration(duration)}
+                      </span>
+                    ` : 'N/A'}
+                  </td>
+                  <td><code>${runId || 'N/A'}</code></td>
+               
+                </tr>
+              `}).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
 
-        showNotification(`Job ${job.job_name} executed successfully`, 'success');
-        fetchCronJobs();
-      }, 1500);
+      document.getElementById('historyModalBody').innerHTML = historyHtml;
+      new bootstrap.Modal(document.getElementById('historyModal')).show();
     }
 
-    function editJob(jobId) {
-      currentJobId = jobId;
-      const metadata = mockDB.cron_jobs_metadata.find(j => j.id === jobId);
-      const status = mockDB.cron_jobs_status.find(s => s.job_id === jobId);
-
-      if (!metadata) {
-        showNotification('Job not found', 'danger');
+    function downloadJobLogs(runId) {
+      if (!runId) {
+        showNotification('No run ID available for this job', 'warning');
         return;
       }
-
-      // Fill the edit form with current data
-      document.getElementById('editJobId').value = jobId;
-      document.getElementById('editJobName').value = metadata.job_name;
-      document.getElementById('editDescription').value = metadata.description || '';
-      document.getElementById('editApplication').value = metadata.application;
-      document.getElementById('editServerName').value = metadata.server_name;
-      document.getElementById('editTableName').value = metadata.table_name || '';
-      document.getElementById('editCronExpression').value = metadata.cron_expression;
-      document.getElementById('editCommand').value = metadata.command;
-      document.getElementById('editStatus').value = status ? status.status : 'active';
-
-      const modal = new bootstrap.Modal(document.getElementById('editJobModal'));
-      modal.show();
+      showNotification(`Downloading logs for run ID: ${runId}... This is a demo action.`, 'info');
     }
 
-    function saveJobChanges() {
-      const form = document.getElementById('editJobForm');
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-
-      const jobId = parseInt(document.getElementById('editJobId').value);
-      const metadataIndex = mockDB.cron_jobs_metadata.findIndex(j => j.id === jobId);
-      const statusIndex = mockDB.cron_jobs_status.findIndex(s => s.job_id === jobId);
-
-      if (metadataIndex === -1) {
-        showNotification('Job not found', 'danger');
-        return;
-      }
-
-      // Update metadata
-      mockDB.cron_jobs_metadata[metadataIndex] = {
-        ...mockDB.cron_jobs_metadata[metadataIndex],
-        job_name: document.getElementById('editJobName').value,
-        description: document.getElementById('editDescription').value,
-        application: document.getElementById('editApplication').value,
-        server_name: document.getElementById('editServerName').value,
-        table_name: document.getElementById('editTableName').value,
-        cron_expression: document.getElementById('editCronExpression').value,
-        command: document.getElementById('editCommand').value,
-        updated_at: new Date().toISOString()
-      };
-
-      // Update status
-      if (statusIndex !== -1) {
-        mockDB.cron_jobs_status[statusIndex] = {
-          ...mockDB.cron_jobs_status[statusIndex],
-          status: document.getElementById('editStatus').value,
-          updated_at: new Date().toISOString()
-        };
-      }
-
-      // Add log entry
-      mockDB.job_logs.push({
-        id: mockDB.job_logs.length + 1,
-        job_id: jobId,
-        timestamp: new Date().toISOString(),
-        message: 'Job configuration updated',
-        type: 'info'
-      });
-
-      // Close modal
-      bootstrap.Modal.getInstance(document.getElementById('editJobModal')).hide();
-
-      // Refresh data
-      showNotification('Job updated successfully', 'success');
-      fetchCronJobs();
-    }
-
-    function deleteJob() {
-      if (!confirm('Are you sure you want to delete this job? This action cannot be undone.')) {
-        return;
-      }
-
-      const jobId = parseInt(document.getElementById('editJobId').value);
-
-      // Remove from metadata
-      const metadataIndex = mockDB.cron_jobs_metadata.findIndex(j => j.id === jobId);
-      if (metadataIndex !== -1) {
-        mockDB.cron_jobs_metadata.splice(metadataIndex, 1);
-      }
-
-      // Remove from status
-      const statusIndex = mockDB.cron_jobs_status.findIndex(s => s.job_id === jobId);
-      if (statusIndex !== -1) {
-        mockDB.cron_jobs_status.splice(statusIndex, 1);
-      }
-
-      // Remove logs
-      mockDB.job_logs = mockDB.job_logs.filter(log => log.job_id !== jobId);
-
-      // Close modal
-      bootstrap.Modal.getInstance(document.getElementById('editJobModal')).hide();
-
-      // Refresh data
-      showNotification('Job deleted successfully', 'success');
-      fetchCronJobs();
-    }
-
-    function downloadJobLogs(jobId) {
-      if (!jobId && currentJobId) {
-        jobId = currentJobId;
-      }
-
-      if (!jobId) {
-        showNotification('No job selected', 'warning');
-        return;
-      }
-
-      const metadata = mockDB.cron_jobs_metadata.find(j => j.id === jobId);
-      if (!metadata) {
-        showNotification('Job not found', 'danger');
-        return;
-      }
-
-      const logs = mockDB.job_logs.filter(log => log.job_id === jobId);
-      const status = mockDB.cron_jobs_status.find(s => s.job_id === jobId);
-
-      // Create log content
-      let logContent = `Cron Job Logs: ${metadata.job_name}\n`;
-      logContent += `========================================\n`;
-      logContent += `Job ID: ${metadata.id}\n`;
-      logContent += `Application: ${metadata.application}\n`;
-      logContent += `Server: ${metadata.server_name}\n`;
-      logContent += `Status: ${status ? status.status : 'pending'}\n`;
-      logContent += `Last Run: ${status && status.last_run ? formatDateTime(status.last_run) : 'Never'}\n`;
-      logContent += `Error Message: ${status && status.error_message ? status.error_message : 'None'}\n`;
-      logContent += `========================================\n\n`;
-      logContent += `EXECUTION LOGS:\n`;
-      logContent += `========================================\n\n`;
-
-      if (logs.length === 0) {
-        logContent += 'No log entries found.\n';
-      } else {
-        // Sort logs by timestamp (newest first)
-        const sortedLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-        sortedLogs.forEach(log => {
-          const timestamp = formatDateTime(log.timestamp);
-          const type = log.type.toUpperCase();
-          logContent += `[${timestamp}] [${type}] ${log.message}\n`;
-        });
-      }
-
-      logContent += `\n========================================\n`;
-      logContent += `Total Log Entries: ${logs.length}\n`;
-      logContent += `Generated: ${new Date().toLocaleString()}\n`;
-
-      // Create blob and download
-      const blob = new Blob([logContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `cron-job-${metadata.job_name.replace(/\s+/g, '-').toLowerCase()}-logs-${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showNotification(`Logs downloaded for ${metadata.job_name}`, 'success');
-    }
-
-    function showAddJobModal() {
-      const modal = new bootstrap.Modal(document.getElementById('addJobModal'));
-      modal.show();
-    }
-
-    function addNewJob() {
-      const form = document.getElementById('addJobForm');
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-
-      const formData = new FormData(form);
-      const newJob = {
-        id: mockDB.cron_jobs_metadata.length + 1,
-        job_name: formData.get('jobName'),
-        description: formData.get('description'),
-        application: formData.get('application'),
-        server_name: formData.get('serverName'),
-        table_name: formData.get('tableName'),
-        cron_expression: formData.get('cronExpression'),
-        command: formData.get('command'),
-        created_at: new Date().toISOString(),
-        avg_duration: '0s'
-      };
-
-      // Add to metadata table
-      mockDB.cron_jobs_metadata.push(newJob);
-
-      // Add to status table
-      mockDB.cron_jobs_status.push({
-        id: mockDB.cron_jobs_status.length + 1,
-        job_id: newJob.id,
-        last_run: null,
-        next_run: calculateNextRun(newJob.cron_expression),
-        status: formData.get('status'),
-        duration: null,
-        exit_code: null,
-        output: 'Job created, waiting for first run',
-        error_message: '',
-        updated_at: new Date().toISOString()
-      });
-
-      // Close modal
-      bootstrap.Modal.getInstance(document.getElementById('addJobModal')).hide();
-      form.reset();
-
-      // Refresh data
-      showNotification('New job added successfully', 'success');
-      fetchCronJobs();
-    }
-
-    function applyFilters() {
-      currentFilter = {
-        application: document.getElementById('filterApplication').value,
-        status: document.getElementById('filterStatus').value,
-        fromDate: document.getElementById('filterFromDate').value,
-        toDate: document.getElementById('filterToDate').value
-      };
-
-      // In a real application, you would make an API call with these filters
-      // For now, we'll filter the mock data
-      let filteredJobs = mockDB.cron_jobs_metadata.map(metadata => {
-        const status = mockDB.cron_jobs_status.find(s => s.job_id === metadata.id);
-        const logs = mockDB.job_logs.filter(log => log.job_id === metadata.id);
-
-        return {
-          ...metadata,
-          status: status ? status.status : 'pending',
-          last_run: status ? status.last_run : null,
-          next_run: status ? status.next_run : calculateNextRun(metadata.cron_expression),
-          duration: status ? status.duration : null,
-          exit_code: status ? status.exit_code : null,
-          output: status ? status.output : '',
-          error_message: status ? status.error_message : '',
-          updated_at: status ? status.updated_at : metadata.created_at,
-          logs: logs
-        };
-      });
-
-      // Apply filters
-      if (currentFilter.application) {
-        filteredJobs = filteredJobs.filter(job =>
-          job.application.toLowerCase() === currentFilter.application.toLowerCase()
-        );
-      }
-
-      if (currentFilter.status) {
-        filteredJobs = filteredJobs.filter(job =>
-          job.status.toLowerCase() === currentFilter.status.toLowerCase()
-        );
-      }
-
-      if (currentFilter.fromDate) {
-        const fromDate = new Date(currentFilter.fromDate);
-        filteredJobs = filteredJobs.filter(job => {
-          if (!job.last_run) return true;
-          const lastRun = new Date(job.last_run);
-          return lastRun >= fromDate;
-        });
-      }
-
-      if (currentFilter.toDate) {
-        const toDate = new Date(currentFilter.toDate);
-        toDate.setHours(23, 59, 59, 999); // End of day
-        filteredJobs = filteredJobs.filter(job => {
-          if (!job.last_run) return true;
-          const lastRun = new Date(job.last_run);
-          return lastRun <= toDate;
-        });
-      }
-
-      updateJobsTable(filteredJobs);
-      showNotification('Filters applied', 'info');
-    }
-
-    function clearFilters() {
-      document.getElementById('filterApplication').value = '';
-      document.getElementById('filterStatus').value = '';
-      document.getElementById('filterFromDate').value = '';
-      document.getElementById('filterToDate').value = '';
-
-      currentFilter = {
-        application: '',
-        status: '',
-        fromDate: '',
-        toDate: ''
-      };
-
-      fetchCronJobs();
-      showNotification('Filters cleared', 'info');
-    }
-
-    function getCronDescription(cronExpression) {
-      const parts = cronExpression.split(' ');
-      if (parts.length !== 5) return 'Invalid cron expression';
-
-      const [minute, hour, day, month, weekday] = parts;
-      let description = 'Runs ';
-
-      if (minute === '*' && hour === '*') {
-        description += 'every minute';
-      } else if (minute === '*/15' && hour === '*') {
-        description += 'every 15 minutes';
-      } else if (minute === '0' && hour === '2') {
-        description += 'daily at 2:00 AM';
-      } else if (minute === '0' && hour === '*/4') {
-        description += 'every 4 hours';
-      } else if (minute === '30' && hour === '6') {
-        description += 'daily at 6:30 AM';
-      } else if (minute === '0' && hour === '0') {
-        description += 'daily at midnight';
-      } else if (minute === '0' && hour === '8') {
-        description += 'daily at 8:00 AM';
-      } else {
-        description += `at ${hour}:${minute}`;
-      }
-
-      return description;
+    function refreshAllData() {
+      fetchAllData();
+      showNotification('Refreshing data...', 'info');
     }
 
     function showLoading(show) {
-      document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
-      document.querySelector('.filter-card').style.display = show ? 'none' : 'block';
-      document.querySelector('.data-table').style.display = show ? 'none' : 'block';
+      const spinner = document.getElementById('loadingSpinner');
+      const tabContent = document.getElementById('cronTabContent');
+
+      if (spinner) spinner.style.display = show ? 'block' : 'none';
+      if (tabContent) tabContent.style.display = show ? 'none' : 'block';
     }
 
     function showNotification(message, type) {
@@ -1596,12 +2091,15 @@
       }, 3000);
     }
 
-    // Auto-refresh every 30 seconds
-    setInterval(fetchCronJobs, 30000);
+    // ================== INITIALIZATION ==================
+    async function initializeAllData() {
+      await loadActiveApplications();
+      await fetchAllData();
+    }
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', () => {
-      fetchCronJobs();
+      initializeAllData();
     });
   </script>
 </body>
